@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 return [
   768 => 173,
   777 => 173,

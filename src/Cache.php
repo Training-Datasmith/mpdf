@@ -1,151 +1,149 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mpdf;
 
 use DirectoryIterator;
 
 class Cache
 {
+    private $basePath;
 
-	private $basePath;
+    private $cleanupInterval;
 
-	private $cleanupInterval;
+    public function __construct($basePath, $cleanupInterval = 3600)
+    {
+        if (!is_int($cleanupInterval) && false !== $cleanupInterval) {
+            throw new \Mpdf\MpdfException('Cache cleanup interval has to be an integer or false');
+        }
 
-	public function __construct($basePath, $cleanupInterval = 3600)
-	{
-		if (!is_int($cleanupInterval) && false !== $cleanupInterval) {
-			throw new \Mpdf\MpdfException('Cache cleanup interval has to be an integer or false');
-		}
+        if (!$this->createBasePath($basePath)) {
+            throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
+        }
 
-		if (!$this->createBasePath($basePath)) {
-			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
-		}
+        $this->basePath = $basePath;
+        $this->cleanupInterval = $cleanupInterval;
+    }
 
-		$this->basePath = $basePath;
-		$this->cleanupInterval = $cleanupInterval;
-	}
+    protected function createBasePath($basePath)
+    {
+        if (!file_exists($basePath)) {
+            if (!$this->createDirectory($basePath)) {
+                return false;
+            }
+        }
 
-	protected function createBasePath($basePath)
-	{
-		if (!file_exists($basePath)) {
-			if (!$this->createDirectory($basePath)) {
-				return false;
-			}
-		}
+        if (!is_writable($basePath) || !is_dir($basePath)) {
+            return false;
+        }
 
-		if (!is_writable($basePath) || !is_dir($basePath)) {
-			return false;
-		}
+        return true;
+    }
 
-		return true;
-	}
+    protected function createDirectory($basePath)
+    {
+        $parentPath = $this->getExistingParentDirectory($basePath);
+        $permissions = $this->getPermission($parentPath);
+        if (!mkdir($basePath, $permissions, true)) {
+            return false;
+        }
 
-	protected function createDirectory($basePath)
-	{
-		$parentPath = $this->getExistingParentDirectory($basePath);
-		$permissions = $this->getPermission($parentPath);
-		if (!mkdir($basePath, $permissions, true)) {
-			return false;
-		}
+        /* Check if umask modified the permissions and reset any created directories */
+        if (($permissions & ~umask()) !== $permissions) {
+            $basePath = realpath($basePath);
+            $folders = explode('/', substr($basePath, strlen($parentPath) + 1));
+            for ($i = 1, $total = count($folders); $i <= $total; $i++) {
+                $path = $parentPath . '/';
+                $path .= implode('/', array_slice($folders, 0, $i));
 
+                chmod($path, $permissions);
+            }
+        }
 
-		/* Check if umask modified the permissions and reset any created directories */
-		if (($permissions & ~umask()) !== $permissions) {
-			$basePath = realpath($basePath);
-			$folders = explode('/', substr($basePath, strlen($parentPath) + 1));
-			for ($i = 1, $total = count($folders); $i <= $total; $i++) {
-				$path = $parentPath . '/';
-				$path .= implode('/', array_slice($folders, 0, $i));
+        return true;
+    }
 
-				chmod($path, $permissions);
-			}
-		}
+    protected function getExistingParentDirectory($basePath)
+    {
+        $targetParent = dirname($basePath);
+        while ($targetParent !== '.' && ! is_dir($targetParent) && dirname($targetParent) !== $targetParent) {
+            $targetParent = dirname($targetParent);
+        }
 
-		return true;
-	}
+        return realpath($targetParent);
+    }
 
-	protected function getExistingParentDirectory($basePath)
-	{
-		$targetParent = dirname($basePath);
-		while ($targetParent !== '.' && ! is_dir($targetParent) && dirname($targetParent) !== $targetParent) {
-			$targetParent = dirname($targetParent);
-		}
+    protected function getPermission($basePath, $fallbackPermission = 0777)
+    {
+        if (! is_dir($basePath)) {
+            return $fallbackPermission;
+        }
 
-		return realpath($targetParent);
-	}
+        $result = fileperms($basePath);
 
-	protected function getPermission($basePath, $fallbackPermission = 0777)
-	{
-		if (! is_dir($basePath)) {
-			return $fallbackPermission;
-		}
+        return $result ? $result & 0007777 : $fallbackPermission;
+    }
 
-		$result = fileperms($basePath);
+    public function tempFilename($filename)
+    {
+        return $this->getFilePath($filename);
+    }
 
-		return $result ? $result & 0007777 : $fallbackPermission;
-	}
+    public function has($filename)
+    {
+        return file_exists($this->getFilePath($filename));
+    }
 
-	public function tempFilename($filename)
-	{
-		return $this->getFilePath($filename);
-	}
+    public function load($filename)
+    {
+        return file_get_contents($this->getFilePath($filename));
+    }
 
-	public function has($filename)
-	{
-		return file_exists($this->getFilePath($filename));
-	}
+    public function write($filename, $data)
+    {
+        $tempFile = tempnam($this->basePath, 'cache_tmp_');
+        file_put_contents($tempFile, $data);
+        chmod($tempFile, 0664);
 
-	public function load($filename)
-	{
-		return file_get_contents($this->getFilePath($filename));
-	}
+        $path = $this->getFilePath($filename);
+        rename($tempFile, $path);
 
-	public function write($filename, $data)
-	{
-		$tempFile = tempnam($this->basePath, 'cache_tmp_');
-		file_put_contents($tempFile, $data);
-		chmod($tempFile, 0664);
+        return $path;
+    }
 
-		$path = $this->getFilePath($filename);
-		rename($tempFile, $path);
+    public function remove($filename)
+    {
+        return unlink($this->getFilePath($filename));
+    }
 
-		return $path;
-	}
+    public function clearOld()
+    {
+        $iterator = new DirectoryIterator($this->basePath);
 
-	public function remove($filename)
-	{
-		return unlink($this->getFilePath($filename));
-	}
+        /** @var \DirectoryIterator $item */
+        foreach ($iterator as $item) {
+            if (!$item->isDot()
+                    && $item->isFile()
+                    && !$this->isDotFile($item)
+                    && $this->isOld($item)) {
+                unlink($item->getPathname());
+            }
+        }
+    }
 
-	public function clearOld()
-	{
-		$iterator = new DirectoryIterator($this->basePath);
+    private function getFilePath($filename)
+    {
+        return $this->basePath . '/' . $filename;
+    }
 
-		/** @var \DirectoryIterator $item */
-		foreach ($iterator as $item) {
-			if (!$item->isDot()
-					&& $item->isFile()
-					&& !$this->isDotFile($item)
-					&& $this->isOld($item)) {
-				unlink($item->getPathname());
-			}
-		}
-	}
+    private function isOld(DirectoryIterator $item)
+    {
+        return $this->cleanupInterval && $item->getMTime() + $this->cleanupInterval < time();
+    }
 
-	private function getFilePath($filename)
-	{
-		return $this->basePath . '/' . $filename;
-	}
-
-	private function isOld(DirectoryIterator $item)
-	{
-		return $this->cleanupInterval
-			? $item->getMTime() + $this->cleanupInterval < time()
-			: false;
-	}
-
-	public function isDotFile(DirectoryIterator $item)
-	{
-		return substr($item->getFilename(), 0, 1) === '.';
-	}
+    public function isDotFile(DirectoryIterator $item)
+    {
+        return substr($item->getFilename(), 0, 1) === '.';
+    }
 }

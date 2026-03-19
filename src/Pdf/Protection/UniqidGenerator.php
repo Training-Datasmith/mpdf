@@ -16,17 +16,10 @@ class UniqidGenerator
 	}
 
 	/**
-	 * @return string
+	 * @return string 32-character uppercase hex string derived from 16 cryptographically secure random bytes
 	 */
-	public function generate()
+	public function generate(): string
 	{
-		$chars = 'ABCDEF1234567890';
-		$id = '';
-
-		for ($i = 0; $i < 32; $i++) {
-			$id .= $chars[random_int(0, 15)];
-		}
-
-		return md5($id);
+		return strtoupper(bin2hex(random_bytes(16)));
 	}
 }

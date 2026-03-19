@@ -30,135 +30,135 @@ if (!function_exists('Mpdf\unicode_hex')) {
 class OtlDump
 {
 
-	var $GPOSFeatures; // mPDF 5.7.1
+	public $GPOSFeatures; // mPDF 5.7.1
 
-	var $GPOSLookups;  // mPDF 5.7.1
+	public $GPOSLookups;  // mPDF 5.7.1
 
-	var $GPOSScriptLang; // mPDF 5.7.1
+	public $GPOSScriptLang; // mPDF 5.7.1
 
-	var $ignoreStrings; // mPDF 5.7.1
+	public $ignoreStrings; // mPDF 5.7.1
 
-	var $MarkAttachmentType; // mPDF 5.7.1
+	public $MarkAttachmentType; // mPDF 5.7.1
 
-	var $MarkGlyphSets; // mPDF 7.5.1
+	public $MarkGlyphSets; // mPDF 7.5.1
 
-	var $GlyphClassMarks; // mPDF 5.7.1
+	public $GlyphClassMarks; // mPDF 5.7.1
 
-	var $GlyphClassLigatures; // mPDF 5.7.1
+	public $GlyphClassLigatures; // mPDF 5.7.1
 
-	var $GlyphClassBases; // mPDF 5.7.1
+	public $GlyphClassBases; // mPDF 5.7.1
 
-	var $GlyphClassComponents; // mPDF 5.7.1
+	public $GlyphClassComponents; // mPDF 5.7.1
 
-	var $GSUBScriptLang; // mPDF 5.7.1
+	public $GSUBScriptLang; // mPDF 5.7.1
 
-	var $rtlPUAstr; // mPDF 5.7.1
+	public $rtlPUAstr; // mPDF 5.7.1
 
-	var $rtlPUAarr; // mPDF 5.7.1
+	public $rtlPUAarr; // mPDF 5.7.1
 
-	var $fontkey; // mPDF 5.7.1
+	public $fontkey; // mPDF 5.7.1
 
-	var $useOTL; // mPDF 5.7.1
+	public $useOTL; // mPDF 5.7.1
 
-	var $panose;
+	public $panose;
 
-	var $maxUni;
+	public $maxUni;
 
-	var $sFamilyClass;
+	public $sFamilyClass;
 
-	var $sFamilySubClass;
+	public $sFamilySubClass;
 
-	var $sipset;
+	public $sipset;
 
-	var $smpset;
+	public $smpset;
 
-	var $_pos;
+	public $_pos;
 
-	var $numTables;
+	public $numTables;
 
-	var $searchRange;
+	public $searchRange;
 
-	var $entrySelector;
+	public $entrySelector;
 
-	var $rangeShift;
+	public $rangeShift;
 
-	var $tables;
+	public $tables;
 
-	var $otables;
+	public $otables;
 
-	var $filename;
+	public $filename;
 
-	var $fh;
+	public $fh;
 
-	var $glyphPos;
+	public $glyphPos;
 
-	var $charToGlyph;
+	public $charToGlyph;
 
-	var $ascent;
+	public $ascent;
 
-	var $descent;
+	public $descent;
 
-	var $name;
+	public $name;
 
-	var $familyName;
+	public $familyName;
 
-	var $styleName;
+	public $styleName;
 
-	var $fullName;
+	public $fullName;
 
-	var $uniqueFontID;
+	public $uniqueFontID;
 
-	var $unitsPerEm;
+	public $unitsPerEm;
 
-	var $bbox;
+	public $bbox;
 
-	var $capHeight;
+	public $capHeight;
 
-	var $stemV;
+	public $stemV;
 
-	var $italicAngle;
+	public $italicAngle;
 
-	var $flags;
+	public $flags;
 
-	var $underlinePosition;
+	public $underlinePosition;
 
-	var $underlineThickness;
+	public $underlineThickness;
 
-	var $charWidths;
+	public $charWidths;
 
-	var $defaultWidth;
+	public $defaultWidth;
 
-	var $maxStrLenRead;
+	public $maxStrLenRead;
 
-	var $numTTCFonts;
+	public $numTTCFonts;
 
-	var $TTCFonts;
+	public $TTCFonts;
 
-	var $maxUniChar;
+	public $maxUniChar;
 
-	var $kerninfo;
+	public $kerninfo;
 
-	var $mode;
+	public $mode;
 
-	var $glyphToChar;
+	public $glyphToChar;
 
-	var $fontRevision;
+	public $fontRevision;
 
-	var $glyphdata;
+	public $glyphdata;
 
-	var $glyphIDtoUn;
+	public $glyphIDtoUn;
 
-	var $restrictedUse;
+	public $restrictedUse;
 
-	var $GSUBFeatures;
+	public $GSUBFeatures;
 
-	var $GSUBLookups;
+	public $GSUBLookups;
 
-	var $glyphIDtoUni;
+	public $glyphIDtoUni;
 
-	var $GSLuCoverage;
+	public $GSLuCoverage;
 
-	var $version;
+	public $version;
 
 	private $mpdf;
 
@@ -345,7 +345,7 @@ class OtlDump
 		$s = fread($this->fh, 2);
 		$a = (ord($s[0]) << 8) + ord($s[1]);
 		if ($a & (1 << 15)) {
-			$a = ($a - (1 << 16));
+			return $a - (1 << 16);
 		}
 
 		return $a;
@@ -355,7 +355,7 @@ class OtlDump
 	{
 		$a = (ord($s[0]) << 8) + ord($s[1]);
 		if ($a & (1 << 15)) {
-			$a = ($a - (1 << 16));
+			return $a - (1 << 16);
 		}
 
 		return $a;
@@ -603,7 +603,7 @@ class OtlDump
 		$yMax = $this->read_short();
 		$this->bbox = [($xMin * $scale), ($yMin * $scale), ($xMax * $scale), ($yMax * $scale)];
 		$this->skip(3 * 2);
-		$indexToLocFormat = $this->read_ushort();
+		$this->read_ushort();
 		$glyphDataFormat = $this->read_ushort();
 		if ($glyphDataFormat != 0) {
 			throw new \Mpdf\Exception\FontException('Error loading font: Unknown glyph data format ' . $glyphDataFormat);
@@ -675,7 +675,7 @@ class OtlDump
 			}
 			$this->capHeight = $this->ascent;
 		}
-		$this->stemV = 50 + intval(pow(($usWeightClass / 65.0), 2));
+		$this->stemV = 50 + intval(($usWeightClass / 65.0) ** 2);
 
 		///////////////////////////////////
 		// post - PostScript table
@@ -1363,12 +1363,6 @@ class OtlDump
 				}
 			}
 
-// $this->GSLuCoverage and $GSLookup
-			//=====================================================================================
-			$s = '<?php
-$GSLuCoverage = ' . var_export($this->GSLuCoverage, true) . ';
-?>';
-
 			//=====================================================================================
 			$s = '<?php
 $GlyphClassBases = \'' . $this->GlyphClassBases . '\';
@@ -1674,9 +1668,12 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								if ($this->_checkGSUBignore($Lookup[$i]['Flag'], $replace[0], $Lookup[$i]['MarkFilteringSet'])) {
 									continue;
 								}
-								if (!isset($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID']) || count($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID']) == 0) {
-									continue;
-								} // Illegal for GlyphCount to be 0; either error in font, or something has gone wrong - lets carry on for now!
+                                if (!isset($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID'])) {
+                                    continue;
+                                }
+                                if (count($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID']) == 0) {
+                                    continue;
+                                } // Illegal for GlyphCount to be 0; either error in font, or something has gone wrong - lets carry on for now!
 								foreach ($Lookup[$i]['Subtable'][$c]['Sequences'][$g]['SubstituteGlyphID'] as $sub) {
 									$substitute[] = unicode_hex($this->glyphToChar[$sub][0]);
 								}
@@ -1972,7 +1969,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 /////////////////////////////////////////////////////////////////////////////////////////
 	// GSUB functions
-	function _getGSUBarray(&$Lookup, &$lul, $scripttag, $level = 1, $coverage = '', $exB = '', $exL = '')
+	function _getGSUBarray(array &$Lookup, &$lul, $scripttag, $level = 1, $coverage = '', $exB = '', $exL = '')
 	{
 		// Process (3) LookupList for specific Script-LangSys
 		// Generate preg_replace
@@ -2687,27 +2684,26 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	// mPDF 5.7.1
 	function _checkGSUBignore($flag, $glyph, $MarkFilteringSet)
 	{
-		$ignore = false;
 		// Flag & 0x0008 = Ignore Marks
 		if ((($flag & 0x0008) == 0x0008) && strpos($this->GlyphClassMarks, $glyph)) {
-			$ignore = true;
+			return true;
 		}
 		if ((($flag & 0x0004) == 0x0004) && strpos($this->GlyphClassLigatures, $glyph)) {
-			$ignore = true;
+			return true;
 		}
 		if ((($flag & 0x0002) == 0x0002) && strpos($this->GlyphClassBases, $glyph)) {
-			$ignore = true;
+			return true;
 		}
 		// Flag & 0xFF?? = MarkAttachmentType
 		if (($flag & 0xFF00) && strpos($this->MarkAttachmentType[($flag >> 8)], $glyph)) {
-			$ignore = true;
+			return true;
 		}
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if (($flag & 0x0010) && strpos($this->MarkGlyphSets[$MarkFilteringSet], $glyph)) {
-			$ignore = true;
+			return true;
 		}
 
-		return $ignore;
+		return false;
 	}
 
 	function _getGSUBignoreString($flag, $MarkFilteringSet)
@@ -2729,8 +2725,6 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
 			throw new \Mpdf\Exception\FontException("This font " . $this->fontkey . " contains MarkGlyphSets");
-			$str = "Mark Glyph Set: ";
-			$str .= $this->MarkGlyphSets[$MarkFilteringSet];
 		}
 
 		// If Ignore Marks set, supercedes any above
@@ -2761,9 +2755,8 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		}
 		if ($str) {
 			return $str;
-		} else {
-			return "";
 		}
+        return "";
 	}
 
 	// GSUB Patterns
@@ -2809,7 +2802,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	  F - "\${1}\${2} \${3}\${4} \${5} REPL\${6}\${8}"
 	 */
 
-	function _makeGSUBcontextInputMatch($inputGlyphs, $ignore, $lookupGlyphs, $seqIndex)
+	function _makeGSUBcontextInputMatch($inputGlyphs, $ignore, array $lookupGlyphs, $seqIndex)
 	{
 		// $ignore = "((?:(?: FBA1| FBA2| FBA3))*)" or "()"
 		// Returns e.g. ¦(0612)¦(ignore) (0613)¦(ignore) (0614)¦
@@ -3218,7 +3211,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	//=====================================================================================
 /////////////////////////////////////////////////////////////////////////////////////////
 	// GPOS functions
-	function _getGPOSarray(&$Lookup, $lul, $scripttag, $level = 1, $lcoverage = '', $exB = '', $exL = '')
+	function _getGPOSarray(array &$Lookup, $lul, $scripttag, $level = 1, $lcoverage = '', $exB = '', $exL = '')
 	{
 		// Process (3) LookupList for specific Script-LangSys
 		$html = '';
@@ -3605,11 +3598,10 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 								for ($i = 0; $i < count($MarkGlyphs); $i++) {
 									if ($level == 2 && strpos($lcoverage, $MarkGlyphs[$i]) === false) {
 										continue;
-									} else {
-										if (!$firstMark) {
+									}
+                                    if (!$firstMark) {
 											$firstMark = $MarkGlyphs[$i];
 										}
-									}
 									$html .= ' ' . $this->formatEntity($MarkGlyphs[$i]) . ' ';
 								}
 								$html .= '</div>';
@@ -3653,11 +3645,10 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 									for ($i = 0; $i < count($MarkGlyphs); $i++) {
 										if ($level == 2 && strpos($lcoverage, $MarkGlyphs[$i]) === false) {
 											continue;
-										} else {
-											if (!$firstMark) {
+										}
+                                        if (!$firstMark) {
 												$firstMark = $MarkGlyphs[$i];
 											}
-										}
 										// Get the relevant MarkRecord
 										$MarkRecord[$i] = $this->_getMarkRecord($MarkArray, $i);
 										//Mark Class is = $MarkRecord[$i]['Class']
@@ -3724,11 +3715,10 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 										for ($i = 0; $i < count($Mark1Glyphs); $i++) {
 											if ($level == 2 && strpos($lcoverage, $Mark1Glyphs[$i]) === false) {
 												continue;
-											} else {
-												if (!$firstMark) {
+											}
+                                            if (!$firstMark) {
 													$firstMark = $Mark1Glyphs[$i];
 												}
-											}
 											$html .= ' ' . $this->formatEntity($Mark1Glyphs[$i]) . ' ';
 										}
 										$html .= '</span></div>';
@@ -3758,48 +3748,28 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 											//===========
 											if ($PosFormat == 1) {
 												throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
-											} //===========
-											// Format 2:
-											//===========
-											else {
-												if ($PosFormat == 2) {
-													throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
-												} //===========
-												// Format 3:
-												//===========
-												else {
-													if ($PosFormat == 3) {
-														throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
-													} else {
-														throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
-													}
-												}
 											}
-										} ////////////////////////////////////////////////////////////////////////////////
-										// LookupType 8: Chained Context positioning 	Position one or more glyphs in chained context
-										////////////////////////////////////////////////////////////////////////////////
-										else {
-											if ($Lookup[$luli]['Type'] == 8) {
+                                            if ($PosFormat == 2) {
+													throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
+												}
+                                            if ($PosFormat == 3) {
+														throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not YET TESTED.");
+													}
+                                            throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+										}
+                                        if ($Lookup[$luli]['Type'] == 8) {
 												$html .= '<div class="lookuptype">LookupType 8: Chained Context positioning [Format ' . $PosFormat . ']</div>';
 												//===========
 												// Format 1:
 												//===========
 												if ($PosFormat == 1) {
 													throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-												} //===========
-												// Format 2:
-												//===========
-												else {
-													if ($PosFormat == 2) {
+												}
+                                            if ($PosFormat == 2) {
 														$html .= '<div>GPOS Lookup Type 8: Format 2 not yet supported in OTL dump</div>';
 														continue;
-														/* NB When developing - cf. GSUB 6.2 */
-														throw new \Mpdf\Exception\FontException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-													} //===========
-													// Format 3:
-													//===========
-													else {
-														if ($PosFormat == 3) {
+													}
+                                            if ($PosFormat == 3) {
 															$BacktrackGlyphCount = $this->read_ushort();
 															$CoverageBacktrackOffset = [];
 															for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
@@ -3900,10 +3870,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 																$html .= $this->_getGPOSarray($Lookup, $lul2, $scripttag, 2, $inputGlyphs[$seqIndex], $exB, $exL);
 															}
 														}
-													}
-												}
 											}
-										}
 									}
 								}
 							}
@@ -3981,7 +3948,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		if ($offset) {
 			$this->seek($offset);
 		}
-		$AnchorFormat = $this->read_ushort();
+		$this->read_ushort();
 		$XCoordinate = $this->read_short();
 		$YCoordinate = $this->read_short();
 
@@ -3992,14 +3959,13 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	function _getMarkRecord($offset, $MarkPos)
 	{
 		$this->seek($offset);
-		$MarkCount = $this->read_ushort();
+		$this->read_ushort();
 		$this->skip($MarkPos * 4);
 		$Class = $this->read_ushort();
 		$MarkAnchor = $offset + $this->read_ushort();  // = Offset to anchor table
 		list($x, $y) = $this->_getAnchorTable($MarkAnchor);
-		$MarkRecord = ['Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y];
 
-		return $MarkRecord;
+		return ['Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y];
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -4023,7 +3989,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// Recursively get composite glyphs
-	function getGlyphs($originalGlyphIdx, &$start, &$glyphSet, &$subsetglyphs)
+	function getGlyphs($originalGlyphIdx, &$start, array &$glyphSet, array &$subsetglyphs)
 	{
 		$glyphPos = $this->glyphPos[$originalGlyphIdx];
 		$glyphLen = $this->glyphPos[$originalGlyphIdx + 1] - $glyphPos;
@@ -4068,7 +4034,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 
 	//////////////////////////////////////////////////////////////////////////////////
 
-	function getHMTX($numberOfHMetrics, $numGlyphs, &$glyphToChar, $scale)
+	function getHMTX($numberOfHMetrics, $numGlyphs, array &$glyphToChar, $scale)
 	{
 		$start = $this->seek_table("hmtx");
 		$aw = 0;
@@ -4118,8 +4084,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 				}
 			}
 		}
-		$data = $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
-		$arr = unpack("n*", $data);
+        $this->get_chunk(($start + $numberOfHMetrics * 4), ($numGlyphs * 2));
 		$diff = $numGlyphs - $numberOfHMetrics;
 		$w = intval(round($scale * $aw));
 		if ($w == 0) {
@@ -4129,14 +4094,19 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 			$glyph = $pos + $numberOfHMetrics;
 			if (isset($glyphToChar[$glyph])) {
 				foreach ($glyphToChar[$glyph] as $char) {
-					if ($char != 0 && $char != 65535) {
-						if ($char < 196608) {
-							$this->charWidths[$char * 2] = chr($w >> 8);
-							$this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
-							$nCharWidths++;
-						}
-					}
-				}
+                    if (!($char != 0)) {
+                        continue;
+                    }
+                    if (!($char != 65535)) {
+                        continue;
+                    }
+                    if ($char >= 196608) {
+                        continue;
+                    }
+                    $this->charWidths[$char * 2] = chr($w >> 8);
+                    $this->charWidths[$char * 2 + 1] = chr($w & 0xFF);
+                    $nCharWidths++;
+                }
 			}
 		}
 		// NB 65535 is a set width of 0
@@ -4185,7 +4155,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 	}
 
 	// CMAP Format 4
-	function getCMAP4($unicode_cmap_offset, &$glyphToChar, &$charToGlyph)
+	function getCMAP4($unicode_cmap_offset, array &$glyphToChar, array &$charToGlyph)
 	{
 		$this->maxUniChar = 0;
 		$this->seek($unicode_cmap_offset + 2);
@@ -4360,7 +4330,7 @@ $MarkAttachmentType = ' . var_export($this->MarkAttachmentType, true) . ';
 		$char = preg_replace('/^[0]/', '', $arr[0]);
 		$x = '&#x' . $char . ';';
 		if (strpos($this->GlyphClassMarks, $char) !== false) {
-			$x = '&#x25cc;' . $x;
+			return '&#x25cc;' . $x;
 		}
 
 		return $x;

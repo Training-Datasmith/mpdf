@@ -28,85 +28,85 @@ class Otl
 
 	private $fontCache;
 
-	var $arabLeftJoining;
+	public $arabLeftJoining;
 
-	var $arabRightJoining;
+	public $arabRightJoining;
 
-	var $arabTransparentJoin;
+	public $arabTransparentJoin;
 
-	var $arabTransparent;
+	public $arabTransparent;
 
-	var $GSUBdata;
+	public $GSUBdata;
 
-	var $GPOSdata;
+	public $GPOSdata;
 
-	var $GSUBfont;
+	public $GSUBfont;
 
-	var $fontkey;
+	public $fontkey;
 
-	var $ttfOTLdata;
+	public $ttfOTLdata;
 
-	var $glyphIDtoUni;
+	public $glyphIDtoUni;
 
-	var $_pos;
+	public $_pos;
 
-	var $GSUB_offset;
+	public $GSUB_offset;
 
-	var $GPOS_offset;
+	public $GPOS_offset;
 
-	var $MarkAttachmentType;
+	public $MarkAttachmentType;
 
-	var $MarkGlyphSets;
+	public $MarkGlyphSets;
 
-	var $GlyphClassMarks;
+	public $GlyphClassMarks;
 
-	var $GlyphClassLigatures;
+	public $GlyphClassLigatures;
 
-	var $GlyphClassBases;
+	public $GlyphClassBases;
 
-	var $GlyphClassComponents;
+	public $GlyphClassComponents;
 
-	var $Ignores;
+	public $Ignores;
 
-	var $LuCoverage;
+	public $LuCoverage;
 
-	var $OTLdata;
+	public $OTLdata;
 
-	var $assocLigs;
+	public $assocLigs;
 
-	var $assocMarks;
+	public $assocMarks;
 
-	var $shaper;
+	public $shaper;
 
-	var $restrictToSyllable;
+	public $restrictToSyllable;
 
-	var $lbdicts; // Line-breaking dictionaries
+	public $lbdicts; // Line-breaking dictionaries
 
-	var $LuDataCache;
+	public $LuDataCache;
 
-	var $arabGlyphs;
+	public $arabGlyphs;
 
-	var $current_fh;
+	public $current_fh;
 
-	var $Entry;
+	public $Entry;
 
-	var $Exit;
+	public $Exit;
 
-	var $GDEFdata;
+	public $GDEFdata;
 
-	var $GPOSLookups;
+	public $GPOSLookups;
 
-	var $GSLuCoverage;
+	public $GSLuCoverage;
 
-	var $GSUB_length;
+	public $GSUB_length;
 
-	var $GSUBLookups;
+	public $GSUBLookups;
 
-	var $schOTLdata;
+	public $schOTLdata;
 
-	var $lastBidiStrongType;
+	public $lastBidiStrongType;
 
-	var $debugOTL = false;
+	public $debugOTL = false;
 
 	public function __construct(Mpdf $mpdf, FontCache $fontCache)
 	{
@@ -169,7 +169,6 @@ class Otl
 		$scriptblock = 0;
 		$scriptblocks = [];
 		$scriptblocks[0] = 0;
-		$vstr = '';
 		$OTLdata = [];
 		$subchunk = 0;
 		$charctr = 0;
@@ -277,7 +276,7 @@ class Otl
 
 			$ScriptLang = $this->mpdf->CurrentFont['GSUBScriptLang'];
 			if (count($ScriptLang)) {
-				list($GSUBscriptTag, $is_old_spec) = $this->_getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $this->shaper, $useOTL, 'GSUB');
+				list($GSUBscriptTag, $is_old_spec) = $this->_getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $this->shaper, $useOTL);
 				if ($this->mpdf->fontLanguageOverride && strpos($ScriptLang[$GSUBscriptTag], $this->mpdf->fontLanguageOverride) !== false) {
 					$GSUBlangsys = str_pad($this->mpdf->fontLanguageOverride, 4);
 				} elseif ($GSUBscriptTag && isset($ScriptLang[$GSUBscriptTag]) && $ScriptLang[$GSUBscriptTag] != '') {
@@ -293,7 +292,7 @@ class Otl
 			} // else repeat for GPOS
 			// [Font XBRiyaz has GSUB tables for latn, but not GPOS for latn]
 			elseif (count($ScriptLang)) {
-				list($GPOSscriptTag, $dummy) = $this->_getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $this->shaper, $useOTL, 'GPOS');
+				list($GPOSscriptTag, $dummy) = $this->_getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $this->shaper, $useOTL);
 				if ($GPOSscriptTag && $this->mpdf->fontLanguageOverride && strpos($ScriptLang[$GPOSscriptTag], $this->mpdf->fontLanguageOverride) !== false) {
 					$GPOSlangsys = str_pad($this->mpdf->fontLanguageOverride, 4);
 				} elseif ($GPOSscriptTag && isset($ScriptLang[$GPOSscriptTag]) && $ScriptLang[$GPOSscriptTag] != '') {
@@ -382,7 +381,7 @@ class Otl
 							$this->GSUBdata[$this->GSUBfont]['pstf'] = $font['pstf'];
 						}
 					} else {
-						$this->GSUBdata[$this->GSUBfont] = ['rtlSUB' => [], 'rphf' => [], 'rphf' => [],
+						$this->GSUBdata[$this->GSUBfont] = ['rtlSUB' => [], 'rphf' => [],
 							'pref' => [], 'blwf' => [], 'pstf' => [], 'finals' => ''
 						];
 					}
@@ -1180,7 +1179,6 @@ class Otl
 		// 11. Re-assemble and return text string
 		//==============================
 		$newGPOSinfo = [];
-		$newOTLdata = [];
 		$newchar_data = [];
 		$newgroup = '';
 		$e = '';
@@ -1209,7 +1207,7 @@ class Otl
 		return $e;
 	}
 
-	function _applyTagSettings($tags, $Features, $omittags = '', $onlytags = false)
+	function _applyTagSettings($tags, array $Features, $omittags = '', $onlytags = false)
 	{
 		if (empty($this->mpdf->OTLtags['Plus']) && empty($this->mpdf->OTLtags['Minus']) && empty($this->mpdf->OTLtags['FFPlus']) && empty($this->mpdf->OTLtags['FFMinus'])) {
 			return $tags;
@@ -1565,7 +1563,7 @@ class Otl
 		}
 	}
 
-	function _applyGSUBsubtableSpecial($lookupID, $subtable, $ptr, $currGlyph, $currGID, $nextGlyph, $nextGID, $subtable_offset, $Type, $LuCoverage)
+	function _applyGSUBsubtableSpecial($lookupID, $subtable, $ptr, $currGlyph, $currGID, $nextGlyph, $nextGID, $subtable_offset, $Type, array $LuCoverage)
 	{
 
 		// Special case for Indic
@@ -1575,7 +1573,7 @@ class Otl
 		// See also ttffontsuni.php
 
 		$this->seek($subtable_offset);
-		$SubstFormat = $this->read_ushort();
+		$this->read_ushort();
 
 		// Subtable contains Consonant - Halant
 		// Text string contains Halant ($CurrGlyph) - Consonant ($nextGlyph)
@@ -1583,9 +1581,9 @@ class Otl
 		////////////////////////////////////////////////////////////////////////////////
 		// Only does: LookupType 4: Ligature Substitution Subtable : n to 1
 		////////////////////////////////////////////////////////////////////////////////
-		$Coverage = $subtable_offset + $this->read_ushort();
+		$this->read_ushort();
 		$NextGlyphPos = $LuCoverage[$nextGID];
-		$LigSetCount = $this->read_short();
+		$this->read_short();
 
 		$this->skip($NextGlyphPos * 2);
 		$LigSet = $subtable_offset + $this->read_short();
@@ -1622,40 +1620,36 @@ class Otl
 			$GlyphPos = [];
 			$GlyphPos[] = $ptr;
 			$GlyphPos[] = $ptr + 1;
-
-
-			if ($match) {
-				$shift = $this->GSUBsubstitute($ptr, $substitute, 4, $GlyphPos); // GlyphPos contains positions to set null
-				if ($shift) {
+            $shift = $this->GSUBsubstitute($ptr, $substitute, 4, $GlyphPos);
+            // GlyphPos contains positions to set null
+            if ($shift) {
 					return 1;
 				}
-			}
 		}
 		return 0;
 	}
 
-	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
+	function _applyGSUBsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, array $LuCoverage, $level, $currentTag, $is_old_spec, $tagInt)
 	{
-		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
+		$ignore = $this->_getGCOMignoreString($Flag);
 
 		// Lets start
 		$this->seek($subtable_offset);
 		$SubstFormat = $this->read_ushort();
-
-		////////////////////////////////////////////////////////////////////////////////
-		// LookupType 1: Single Substitution Subtable : 1 to 1
-		////////////////////////////////////////////////////////////////////////////////
-		if ($Type == 1) {
-			// Flag = Ignore
-			if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 1: Single Substitution Subtable : 1 to 1
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 1) {
+            // Flag = Ignore
+            if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
 				return 0;
 			}
-			$CoverageOffset = $subtable_offset + $this->read_ushort();
-			$GlyphPos = $LuCoverage[$currGID];
-			//===========
-			// Format 1:
-			//===========
-			if ($SubstFormat == 1) { // Calculated output glyph indices
+            $CoverageOffset = $subtable_offset + $this->read_ushort();
+            $GlyphPos = $LuCoverage[$currGID];
+            //===========
+            // Format 1:
+            //===========
+            if ($SubstFormat == 1) { // Calculated output glyph indices
 				$DeltaGlyphID = $this->read_short();
 				$this->seek($CoverageOffset);
 				$glyphs = $this->_getCoverageGID();
@@ -1668,116 +1662,111 @@ class Otl
 				$this->skip($GlyphPos * 2);
 				$GlyphID = $this->read_ushort();
 			}
-
-			$substitute = $this->glyphToChar($GlyphID);
-			$shift = $this->GSUBsubstitute($ptr, $substitute, $Type);
-			if ($this->debugOTL && $shift) {
+            $substitute = $this->glyphToChar($GlyphID);
+            $shift = $this->GSUBsubstitute($ptr, $substitute, $Type);
+            if ($this->debugOTL && $shift) {
 				$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 			}
-			if ($shift) {
+            if ($shift) {
 				return 1;
 			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 2: Multiple Substitution Subtable : 1 to n
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 2) {
-			// Flag = Ignore
-			if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
+            return 0;
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 2: Multiple Substitution Subtable : 1 to n
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 2) {
+            // Flag = Ignore
+            if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
 				return 0;
 			}
-			$Coverage = $subtable_offset + $this->read_ushort();
-			$GlyphPos = $LuCoverage[$currGID];
-			$this->skip(2);
-			$this->skip($GlyphPos * 2);
-			$Sequences = $subtable_offset + $this->read_short();
-
-			$this->seek($Sequences);
-			$GlyphCount = $this->read_short();
-			$SubstituteGlyphs = [];
-			for ($g = 0; $g < $GlyphCount; $g++) {
+            $Coverage = $subtable_offset + $this->read_ushort();
+            $GlyphPos = $LuCoverage[$currGID];
+            $this->skip(2);
+            $this->skip($GlyphPos * 2);
+            $Sequences = $subtable_offset + $this->read_short();
+            $this->seek($Sequences);
+            $GlyphCount = $this->read_short();
+            $SubstituteGlyphs = [];
+            for ($g = 0; $g < $GlyphCount; $g++) {
 				$sgid = $this->read_ushort();
 				$SubstituteGlyphs[] = $this->glyphToChar($sgid);
 			}
-
-			$shift = $this->GSUBsubstitute($ptr, $SubstituteGlyphs, $Type);
-			if ($this->debugOTL && $shift) {
+            $shift = $this->GSUBsubstitute($ptr, $SubstituteGlyphs, $Type);
+            if ($this->debugOTL && $shift) {
 				$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 			}
-			if ($shift) {
+            if ($shift) {
 				return $shift;
 			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 3: Alternate Forms : 1 to 1(n)
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 3) {
-			// Flag = Ignore
-			if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
+            return 0;
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 3: Alternate Forms : 1 to 1(n)
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 3) {
+            // Flag = Ignore
+            if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
 				return 0;
 			}
-			$Coverage = $subtable_offset + $this->read_ushort();
-			$AlternateSetCount = $this->read_short();
-			///////////////////////////////////////////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// Need to set alternate IF set by CSS3 font-feature for a tag
-			// i.e. if this is 'salt' alternate may be set to 2
-			// default value will be $alt=1 ( === index of 0 in list of alternates)
-			$alt = 1; // $alt=1 points to Alternative[0]
-			if ($tagInt > 1) {
+            $Coverage = $subtable_offset + $this->read_ushort();
+            $AlternateSetCount = $this->read_short();
+            ///////////////////////////////////////////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // Need to set alternate IF set by CSS3 font-feature for a tag
+            // i.e. if this is 'salt' alternate may be set to 2
+            // default value will be $alt=1 ( === index of 0 in list of alternates)
+            $alt = 1;
+            // $alt=1 points to Alternative[0]
+            if ($tagInt > 1) {
 				$alt = $tagInt;
 			}
-			///////////////////////////////////////////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			if ($alt == 0) {
+            ///////////////////////////////////////////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if ($alt == 0) {
 				return 0;
-			} // If specified alternate not present, cancel [ or could default $alt = 1 ?]
-
-			$GlyphPos = $LuCoverage[$currGID];
-			$this->skip($GlyphPos * 2);
-
-			$AlternateSets = $subtable_offset + $this->read_short();
-			$this->seek($AlternateSets);
-
-			$AlternateGlyphCount = $this->read_short();
-			if ($alt > $AlternateGlyphCount) {
+			}
+            // If specified alternate not present, cancel [ or could default $alt = 1 ?]
+            $GlyphPos = $LuCoverage[$currGID];
+            $this->skip($GlyphPos * 2);
+            $AlternateSets = $subtable_offset + $this->read_short();
+            $this->seek($AlternateSets);
+            $AlternateGlyphCount = $this->read_short();
+            if ($alt > $AlternateGlyphCount) {
 				return 0;
-			} // If specified alternate not present, cancel [ or could default $alt = 1 ?]
-
-			$this->skip(($alt - 1) * 2);
-			$GlyphID = $this->read_ushort();
-
-			$substitute = $this->glyphToChar($GlyphID);
-			$shift = $this->GSUBsubstitute($ptr, $substitute, $Type);
-			if ($this->debugOTL && $shift) {
+			}
+            // If specified alternate not present, cancel [ or could default $alt = 1 ?]
+            $this->skip(($alt - 1) * 2);
+            $GlyphID = $this->read_ushort();
+            $substitute = $this->glyphToChar($GlyphID);
+            $shift = $this->GSUBsubstitute($ptr, $substitute, $Type);
+            if ($this->debugOTL && $shift) {
 				$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 			}
-			if ($shift) {
+            if ($shift) {
 				return 1;
 			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 4: Ligature Substitution Subtable : n to 1
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 4) {
-			// Flag = Ignore
-			if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
+            return 0;
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 4: Ligature Substitution Subtable : n to 1
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 4) {
+            // Flag = Ignore
+            if ($this->_checkGCOMignore($Flag, $currGlyph, $MarkFilteringSet)) {
 				return 0;
 			}
-			$Coverage = $subtable_offset + $this->read_ushort();
-			$FirstGlyphPos = $LuCoverage[$currGID];
-
-			$LigSetCount = $this->read_short();
-
-			$this->skip($FirstGlyphPos * 2);
-			$LigSet = $subtable_offset + $this->read_short();
-
-			$this->seek($LigSet);
-			$LigCount = $this->read_short();
-			// LigatureSet i.e. all starting with the same first Glyph $currGlyph
-			$LigatureOffset = [];
-			for ($g = 0; $g < $LigCount; $g++) {
+            $Coverage = $subtable_offset + $this->read_ushort();
+            $FirstGlyphPos = $LuCoverage[$currGID];
+            $LigSetCount = $this->read_short();
+            $this->skip($FirstGlyphPos * 2);
+            $LigSet = $subtable_offset + $this->read_short();
+            $this->seek($LigSet);
+            $LigCount = $this->read_short();
+            // LigatureSet i.e. all starting with the same first Glyph $currGlyph
+            $LigatureOffset = [];
+            for ($g = 0; $g < $LigCount; $g++) {
 				$LigatureOffset[$g] = $LigSet + $this->read_ushort();
 			}
-			for ($g = 0; $g < $LigCount; $g++) {
+            for ($g = 0; $g < $LigCount; $g++) {
 				// Ligature tables
 				$this->seek($LigatureOffset[$g]);
 				$LigGlyph = $this->read_ushort(); // Output Ligature GlyphID
@@ -1817,19 +1806,21 @@ class Otl
 					}
 				}
 			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 5: Contextual Substitution Subtable
+            return 0;
+        }
+
 		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 5) {
-			//===========
-			// Format 1: Simple Context Glyph Substitution
-			//===========
-			if ($SubstFormat == 1) {
-				$CoverageTableOffset = $subtable_offset + $this->read_ushort();
-				$SubRuleSetCount = $this->read_ushort();
-				$SubRuleSetOffset = [];
-				for ($b = 0; $b < $SubRuleSetCount; $b++) {
+        // LookupType 5: Contextual Substitution Subtable
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 5) {
+            //===========
+            // Format 1: Simple Context Glyph Substitution
+            //===========
+            if ($SubstFormat == 1) {
+                $CoverageTableOffset = $subtable_offset + $this->read_ushort();
+                $SubRuleSetCount = $this->read_ushort();
+                $SubRuleSetOffset = [];
+                for ($b = 0; $b < $SubRuleSetCount; $b++) {
 					$offset = $this->read_ushort();
 					if ($offset == 0x0000) {
 						$SubRuleSetOffset[] = $offset;
@@ -1837,11 +1828,10 @@ class Otl
 						$SubRuleSetOffset[] = $subtable_offset + $offset;
 					}
 				}
-
-				// SubRuleSet tables: All contexts beginning with the same glyph
-				// Select the SubRuleSet required using the position of the glyph in the coverage table
-				$GlyphPos = $LuCoverage[$currGID];
-				if ($SubRuleSetOffset[$GlyphPos] > 0) {
+                // SubRuleSet tables: All contexts beginning with the same glyph
+                // Select the SubRuleSet required using the position of the glyph in the coverage table
+                $GlyphPos = $LuCoverage[$currGID];
+                if ($SubRuleSetOffset[$GlyphPos] > 0) {
 					$this->seek($SubRuleSetOffset[$GlyphPos]);
 					$SubRuleCnt = $this->read_ushort();
 					$SubRule = [];
@@ -1895,24 +1885,25 @@ class Otl
 
 							if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 								return $shift;
-							} /* OTL_FIX_3 */
-							else {
-								return $InputGlyphCount; // should be + matched ignores in Input Sequence
 							}
+                            return $InputGlyphCount;
+                            // should be + matched ignores in Input Sequence
+
 						}
 					}
 				}
-				return 0;
-			} //===========
-			// Format 2:
-			//===========
-			// Format 2: Class-based Context Glyph Substitution
-			elseif ($SubstFormat == 2) {
-				$CoverageTableOffset = $subtable_offset + $this->read_ushort();
-				$InputClassDefOffset = $subtable_offset + $this->read_ushort();
-				$SubClassSetCnt = $this->read_ushort();
-				$SubClassSetOffset = [];
-				for ($b = 0; $b < $SubClassSetCnt; $b++) {
+                return 0;
+            }
+            //===========
+            // Format 2:
+            //===========
+            // Format 2: Class-based Context Glyph Substitution
+            if ($SubstFormat == 2) {
+                $CoverageTableOffset = $subtable_offset + $this->read_ushort();
+                $InputClassDefOffset = $subtable_offset + $this->read_ushort();
+                $SubClassSetCnt = $this->read_ushort();
+                $SubClassSetOffset = [];
+                for ($b = 0; $b < $SubClassSetCnt; $b++) {
 					$offset = $this->read_ushort();
 					if ($offset == 0x0000) {
 						$SubClassSetOffset[] = $offset;
@@ -1920,10 +1911,8 @@ class Otl
 						$SubClassSetOffset[] = $subtable_offset + $offset;
 					}
 				}
-
-				$InputClasses = $this->_getClasses($InputClassDefOffset);
-
-				for ($s = 0; $s < $SubClassSetCnt; $s++) { // $SubClassSet is ordered by input class-may be NULL
+                $InputClasses = $this->_getClasses($InputClassDefOffset);
+                for ($s = 0; $s < $SubClassSetCnt; $s++) { // $SubClassSet is ordered by input class-may be NULL
 					// Select $SubClassSet if currGlyph is in First Input Class
 					if ($SubClassSetOffset[$s] > 0 && isset($InputClasses[$s][$currGID])) {
 						$this->seek($SubClassSetOffset[$s]);
@@ -2004,46 +1993,41 @@ class Otl
 
 								if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 									return $shift;
-								} /* OTL_FIX_3 */
-								else {
-									return $InputGlyphCount; // should be + matched ignores in Input Sequence
 								}
+                                return $InputGlyphCount;
+                                // should be + matched ignores in Input Sequence
+
 							}
 						}
 					}
 				}
-
-				return 0;
-			} //===========
-			// Format 3:
+                return 0;
+            }
+            //===========
+            // Format 3:
+            //===========
+            // Format 3: Coverage-based Context Glyph Substitution
+            if ($SubstFormat == 3) {
+                throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
+            }
+        } elseif ($Type == 6) {
 			//===========
-			// Format 3: Coverage-based Context Glyph Substitution
-			elseif ($SubstFormat == 3) {
-				throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " Format " . $SubstFormat . " not TESTED YET.");
-			}
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 6: Chaining Contextual Substitution Subtable
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 6) {
-			//===========
-			// Format 1:
-			//===========
-			// Format 1: Simple Chaining Context Glyph Substitution
-			if ($SubstFormat == 1) {
-				$Coverage = $subtable_offset + $this->read_ushort();
-				$GlyphPos = $LuCoverage[$currGID];
-				$ChainSubRuleSetCount = $this->read_ushort();
-				// All of the ChainSubRule tables defining contexts that begin with the same first glyph are grouped together and defined in a ChainSubRuleSet table
-				$this->skip($GlyphPos * 2);
-				$ChainSubRuleSet = $subtable_offset + $this->read_ushort();
-				$this->seek($ChainSubRuleSet);
-				$ChainSubRuleCount = $this->read_ushort();
-
-				for ($s = 0; $s < $ChainSubRuleCount; $s++) {
+            // Format 1:
+            //===========
+            // Format 1: Simple Chaining Context Glyph Substitution
+            if ($SubstFormat == 1) {
+                $Coverage = $subtable_offset + $this->read_ushort();
+                $GlyphPos = $LuCoverage[$currGID];
+                $ChainSubRuleSetCount = $this->read_ushort();
+                // All of the ChainSubRule tables defining contexts that begin with the same first glyph are grouped together and defined in a ChainSubRuleSet table
+                $this->skip($GlyphPos * 2);
+                $ChainSubRuleSet = $subtable_offset + $this->read_ushort();
+                $this->seek($ChainSubRuleSet);
+                $ChainSubRuleCount = $this->read_ushort();
+                for ($s = 0; $s < $ChainSubRuleCount; $s++) {
 					$ChainSubRule[$s] = $ChainSubRuleSet + $this->read_ushort();
 				}
-
-				for ($s = 0; $s < $ChainSubRuleCount; $s++) {
+                for ($s = 0; $s < $ChainSubRuleCount; $s++) {
 					$this->seek($ChainSubRule[$s]);
 
 					$BacktrackGlyphCount = $this->read_ushort();
@@ -2100,27 +2084,27 @@ class Otl
 						}
 						if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 							return $shift;
-						} /* OTL_FIX_3 */
-						else {
-							return $InputGlyphCount; // should be + matched ignores in Input Sequence
 						}
+                        return $InputGlyphCount;
+                        // should be + matched ignores in Input Sequence
+
 					}
 				}
-				return 0;
-			} //===========
-			// Format 2:
-			//===========
-			// Format 2: Class-based Chaining Context Glyph Substitution  p257
-			elseif ($SubstFormat == 2) {
-				// NB Format 2 specifies fixed class assignments (identical for each position in the backtrack, input, or lookahead sequence) and exclusive classes (a glyph cannot be in more than one class at a time)
-
-				$CoverageTableOffset = $subtable_offset + $this->read_ushort();
-				$BacktrackClassDefOffset = $subtable_offset + $this->read_ushort();
-				$InputClassDefOffset = $subtable_offset + $this->read_ushort();
-				$LookaheadClassDefOffset = $subtable_offset + $this->read_ushort();
-				$ChainSubClassSetCnt = $this->read_ushort();
-				$ChainSubClassSetOffset = [];
-				for ($b = 0; $b < $ChainSubClassSetCnt; $b++) {
+                return 0;
+            }
+            //===========
+            // Format 2:
+            //===========
+            // Format 2: Class-based Chaining Context Glyph Substitution  p257
+            if ($SubstFormat == 2) {
+                // NB Format 2 specifies fixed class assignments (identical for each position in the backtrack, input, or lookahead sequence) and exclusive classes (a glyph cannot be in more than one class at a time)
+                $CoverageTableOffset = $subtable_offset + $this->read_ushort();
+                $BacktrackClassDefOffset = $subtable_offset + $this->read_ushort();
+                $InputClassDefOffset = $subtable_offset + $this->read_ushort();
+                $LookaheadClassDefOffset = $subtable_offset + $this->read_ushort();
+                $ChainSubClassSetCnt = $this->read_ushort();
+                $ChainSubClassSetOffset = [];
+                for ($b = 0; $b < $ChainSubClassSetCnt; $b++) {
 					$offset = $this->read_ushort();
 					if ($offset == 0x0000) {
 						$ChainSubClassSetOffset[] = $offset;
@@ -2128,12 +2112,10 @@ class Otl
 						$ChainSubClassSetOffset[] = $subtable_offset + $offset;
 					}
 				}
-
-				$BacktrackClasses = $this->_getClasses($BacktrackClassDefOffset);
-				$InputClasses = $this->_getClasses($InputClassDefOffset);
-				$LookaheadClasses = $this->_getClasses($LookaheadClassDefOffset);
-
-				for ($s = 0; $s < $ChainSubClassSetCnt; $s++) { // $ChainSubClassSet is ordered by input class-may be NULL
+                $BacktrackClasses = $this->_getClasses($BacktrackClassDefOffset);
+                $InputClasses = $this->_getClasses($InputClassDefOffset);
+                $LookaheadClasses = $this->_getClasses($LookaheadClassDefOffset);
+                for ($s = 0; $s < $ChainSubClassSetCnt; $s++) { // $ChainSubClassSet is ordered by input class-may be NULL
 					// Select $ChainSubClassSet if currGlyph is in First Input Class
 					if ($ChainSubClassSetOffset[$s] > 0 && isset($InputClasses[$s][$currGID])) {
 						$this->seek($ChainSubClassSetOffset[$s]);
@@ -2271,57 +2253,56 @@ class Otl
 
 								if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 									return $shift;
-								} /* OTL_FIX_3 */
-								else {
-									return $InputGlyphCount; // should be + matched ignores in Input Sequence
 								}
+                                return $InputGlyphCount;
+                                // should be + matched ignores in Input Sequence
+
 							}
 						}
 					}
 				}
-
-				return 0;
-			} //===========
-			// Format 3:
-			//===========
-			// Format 3: Coverage-based Chaining Context Glyph Substitution  p259
-			elseif ($SubstFormat == 3) {
-				$BacktrackGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
+                return 0;
+            }
+            //===========
+            // Format 3:
+            //===========
+            // Format 3: Coverage-based Chaining Context Glyph Substitution  p259
+            if ($SubstFormat == 3) {
+                $BacktrackGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 					$CoverageBacktrackOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$InputGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $InputGlyphCount; $b++) {
+                $InputGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $InputGlyphCount; $b++) {
 					$CoverageInputOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$LookaheadGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
+                $LookaheadGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 					$CoverageLookaheadOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$SubstCount = $this->read_ushort();
-				$save_pos = $this->_pos; // Save the point just after PosCount
-
-				$CoverageBacktrackGlyphs = [];
-				for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
+                $SubstCount = $this->read_ushort();
+                $save_pos = $this->_pos;
+                // Save the point just after PosCount
+                $CoverageBacktrackGlyphs = [];
+                for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 					$this->seek($CoverageBacktrackOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageBacktrackGlyphs[$b] = implode("|", $glyphs);
 				}
-				$CoverageInputGlyphs = [];
-				for ($b = 0; $b < $InputGlyphCount; $b++) {
+                $CoverageInputGlyphs = [];
+                for ($b = 0; $b < $InputGlyphCount; $b++) {
 					$this->seek($CoverageInputOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageInputGlyphs[$b] = implode("|", $glyphs);
 				}
-				$CoverageLookaheadGlyphs = [];
-				for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
+                $CoverageLookaheadGlyphs = [];
+                for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 					$this->seek($CoverageLookaheadOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageLookaheadGlyphs[$b] = implode("|", $glyphs);
 				}
-
-				$matched = $this->checkContextMatchMultiple($CoverageInputGlyphs, $CoverageBacktrackGlyphs, $CoverageLookaheadGlyphs, $ignore, $ptr);
-				if ($matched) {
+                $matched = $this->checkContextMatchMultiple($CoverageInputGlyphs, $CoverageBacktrackGlyphs, $CoverageLookaheadGlyphs, $ignore, $ptr);
+                if ($matched) {
 					if ($this->debugOTL) {
 						$this->_dumpproc('GSUB', $lookupID, $subtable, $Type, $SubstFormat, $ptr, $currGlyph, $level);
 					}
@@ -2355,15 +2336,15 @@ class Otl
 					}
 					if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 						return (isset($shift) ? $shift : 0);
-					} /* OTL_FIX_3 */
-					else {
-						return $InputGlyphCount; // should be + matched ignores in Input Sequence
 					}
-				}
+                    return $InputGlyphCount;
+                    // should be + matched ignores in Input Sequence
 
-				return 0;
-			}
-		} else {
+				}
+                return 0;
+            }
+		}
+        else {
 			throw new \Mpdf\MpdfException("GSUB Lookup Type " . $Type . " not supported.");
 		}
 	}
@@ -2424,14 +2405,15 @@ class Otl
 	{
 
 		// LookupType 1: Simple Substitution Subtable : 1 to 1
-		// LookupType 3: Alternate Forms : 1 to 1(n)
-		if ($Type == 1 || $Type == 3) {
-			$this->OTLdata[$pos]['uni'] = $substitute;
-			$this->OTLdata[$pos]['hex'] = $this->unicode_hex($substitute);
-			return 1;
-		} // LookupType 2: Multiple Substitution Subtable : 1 to n
-		elseif ($Type == 2) {
-			for ($i = 0; $i < count($substitute); $i++) {
+        // LookupType 3: Alternate Forms : 1 to 1(n)
+        if ($Type == 1 || $Type == 3) {
+            $this->OTLdata[$pos]['uni'] = $substitute;
+            $this->OTLdata[$pos]['hex'] = $this->unicode_hex($substitute);
+            return 1;
+        }
+        // LookupType 2: Multiple Substitution Subtable : 1 to n
+        if ($Type == 2) {
+            for ($i = 0; $i < count($substitute); $i++) {
 				$uni = $substitute[$i];
 				$newOTLdata[$i] = [];
 				$newOTLdata[$i]['uni'] = $uni;
@@ -2474,32 +2456,32 @@ class Otl
 					$newOTLdata[$i]['syllable'] = $this->OTLdata[$pos]['syllable'];
 				}
 			}
-			if ($this->shaper == 'K' || $this->shaper == 'T' || $this->shaper == 'L') {
+            if ($this->shaper == 'K' || $this->shaper == 'T' || $this->shaper == 'L') {
 				if ($this->OTLdata[$pos]['wordend']) {
 					$newOTLdata[count($substitute) - 1]['wordend'] = true;
 				}
 			}
-
-			array_splice($this->OTLdata, $pos, 1, $newOTLdata); // Replace 1 with n
-			// Update position of Ligatures and associated Marks
-			// count($substitute)-1  is the number of glyphs added
-			$nadd = count($substitute) - 1;
-			$this->_updateLigatureMarks($pos, $nadd);
-			return count($substitute);
-		} // LookupType 4: Ligature Substitution Subtable : n to 1
-		elseif ($Type == 4) {
-			// Create Ligatures and associated Marks
-			$firstGlyph = $this->OTLdata[$pos]['hex'];
-
-			// If all components of the ligature are marks (and in the same syllable), we call this a mark ligature.
-			$contains_marks = false;
-			$contains_nonmarks = false;
-			if (isset($this->OTLdata[$pos]['syllable'])) {
+            array_splice($this->OTLdata, $pos, 1, $newOTLdata);
+            // Replace 1 with n
+            // Update position of Ligatures and associated Marks
+            // count($substitute)-1  is the number of glyphs added
+            $nadd = count($substitute) - 1;
+            $this->_updateLigatureMarks($pos, $nadd);
+            return count($substitute);
+        }
+        // LookupType 4: Ligature Substitution Subtable : n to 1
+        if ($Type == 4) {
+            // Create Ligatures and associated Marks
+            $firstGlyph = $this->OTLdata[$pos]['hex'];
+            // If all components of the ligature are marks (and in the same syllable), we call this a mark ligature.
+            $contains_marks = false;
+            $contains_nonmarks = false;
+            if (isset($this->OTLdata[$pos]['syllable'])) {
 				$current_syllable = $this->OTLdata[$pos]['syllable'];
 			} else {
 				$current_syllable = 0;
 			}
-			for ($i = 0; $i < count($GlyphPos); $i++) {
+            for ($i = 0; $i < count($GlyphPos); $i++) {
 				// If subsequent components are not Marks as well - don't ligate
 				$unistr = $this->OTLdata[$GlyphPos[$i]]['hex'];
 				if ($this->restrictToSyllable && isset($this->OTLdata[$GlyphPos[$i]]['syllable']) && $this->OTLdata[$GlyphPos[$i]]['syllable'] != $current_syllable) {
@@ -2511,7 +2493,7 @@ class Otl
 					$contains_nonmarks = true;
 				}
 			}
-			if ($contains_marks && !$contains_nonmarks) {
+            if ($contains_marks && !$contains_nonmarks) {
 				// Mark Ligature (all components are Marks)
 				$firstMarkAssoc = '';
 				if (isset($this->assocMarks[$pos])) {
@@ -2614,77 +2596,65 @@ class Otl
 				$lastPos = $GlyphPos[(count($GlyphPos) - 1)] + $ic - 1;
 				$this->assocLigs[$pos] = $currComp; // Number of components in new Ligature
 			}
-
-			// Now remove the unwanted glyphs and associated metadata
-			$newOTLdata[0] = [];
-
-			// Get types of new inserted chars - or replicate type of char being replaced
-			//  $bt = Ucdn::get_bidi_class($substitute);
-			//  if (!$bt) {
-			$bt = $this->OTLdata[$pos]['bidi_type'];
-			//  }
-
-			if (strpos($this->GlyphClassMarks, $this->unicode_hex($substitute)) !== false) {
+            // Now remove the unwanted glyphs and associated metadata
+            $newOTLdata[0] = [];
+            // Get types of new inserted chars - or replicate type of char being replaced
+            //  $bt = Ucdn::get_bidi_class($substitute);
+            //  if (!$bt) {
+            $bt = $this->OTLdata[$pos]['bidi_type'];
+            //  }
+            if (strpos($this->GlyphClassMarks, $this->unicode_hex($substitute)) !== false) {
 				$gp = 'M';
 			} elseif ($substitute == 32) {
 				$gp = 'S';
 			} else {
 				$gp = 'C';
 			}
-
-			// Need to update details of new glyphs inserted
-			$newOTLdata[0]['general_category'] = $this->OTLdata[$pos]['general_category'];
-
-			$newOTLdata[0]['bidi_type'] = $bt;
-			$newOTLdata[0]['group'] = $gp;
-
-			// KASHIDA: If forming a ligature when the last component was identified as a kashida point (final form)
-			// If previous/first component of ligature is a medial form, then keep this as a kashida point
-			// TEST (Arabic Typesetting) &#x64a;&#x64e;&#x646;&#x62a;&#x64f;&#x645;
-			$ka = 0;
-			if (isset($this->OTLdata[$GlyphPos[(count($GlyphPos) - 1)]]['GPOSinfo']['kashida'])) {
+            // Need to update details of new glyphs inserted
+            $newOTLdata[0]['general_category'] = $this->OTLdata[$pos]['general_category'];
+            $newOTLdata[0]['bidi_type'] = $bt;
+            $newOTLdata[0]['group'] = $gp;
+            // KASHIDA: If forming a ligature when the last component was identified as a kashida point (final form)
+            // If previous/first component of ligature is a medial form, then keep this as a kashida point
+            // TEST (Arabic Typesetting) &#x64a;&#x64e;&#x646;&#x62a;&#x64f;&#x645;
+            $ka = 0;
+            if (isset($this->OTLdata[$GlyphPos[(count($GlyphPos) - 1)]]['GPOSinfo']['kashida'])) {
 				$ka = $this->OTLdata[$GlyphPos[(count($GlyphPos) - 1)]]['GPOSinfo']['kashida'];
 			}
-			if ($ka == 1 && isset($this->OTLdata[$pos]['form']) && $this->OTLdata[$pos]['form'] == 3) {
+            if ($ka == 1 && isset($this->OTLdata[$pos]['form']) && $this->OTLdata[$pos]['form'] == 3) {
 				$newOTLdata[0]['GPOSinfo']['kashida'] = $ka;
 			}
-
-			$newOTLdata[0]['uni'] = $substitute;
-			$newOTLdata[0]['hex'] = $this->unicode_hex($substitute);
-
-			if ($this->shaper == 'I' || $this->shaper == 'K' || $this->shaper == 'S') {
+            $newOTLdata[0]['uni'] = $substitute;
+            $newOTLdata[0]['hex'] = $this->unicode_hex($substitute);
+            if ($this->shaper == 'I' || $this->shaper == 'K' || $this->shaper == 'S') {
 				$newOTLdata[0]['indic_category'] = $this->OTLdata[$pos]['indic_category'];
 				$newOTLdata[0]['indic_position'] = $this->OTLdata[$pos]['indic_position'];
 			} elseif ($this->shaper == 'M') {
 				$newOTLdata[0]['myanmar_category'] = $this->OTLdata[$pos]['myanmar_category'];
 				$newOTLdata[0]['myanmar_position'] = $this->OTLdata[$pos]['myanmar_position'];
 			}
-			if (isset($this->OTLdata[$pos]['mask'])) {
+            if (isset($this->OTLdata[$pos]['mask'])) {
 				$newOTLdata[0]['mask'] = $this->OTLdata[$pos]['mask'];
 			}
-			if (isset($this->OTLdata[$pos]['syllable'])) {
+            if (isset($this->OTLdata[$pos]['syllable'])) {
 				$newOTLdata[0]['syllable'] = $this->OTLdata[$pos]['syllable'];
 			}
-
-			$newOTLdata[0]['is_ligature'] = true;
-
-
-			array_splice($this->OTLdata, $pos, 1, $newOTLdata);
-
-			// GlyphPos contains array of arr_pos to set null - not necessarily contiguous
-			// +- Remove any assocMarks or assocLigs from the main components (the ones that are deleted)
-			for ($i = count($GlyphPos) - 1; $i > 0; $i--) {
+            $newOTLdata[0]['is_ligature'] = true;
+            array_splice($this->OTLdata, $pos, 1, $newOTLdata);
+            // GlyphPos contains array of arr_pos to set null - not necessarily contiguous
+            // +- Remove any assocMarks or assocLigs from the main components (the ones that are deleted)
+            for ($i = count($GlyphPos) - 1; $i > 0; $i--) {
 				$gpos = $GlyphPos[$i];
 				array_splice($this->OTLdata, $gpos, 1);
 				unset($this->assocLigs[$gpos]);
 				unset($this->assocMarks[$gpos]);
 			}
-			//  $this->assocLigs = array(); // Ligatures[$posarr lpos] => nc
-			//  $this->assocMarks = array();    // assocMarks[$posarr mpos] => array(compID, ligPos)
-			// Update position of pre-existing Ligatures and associated Marks
-			// Start after first GlyphPos
-			// count($GlyphPos)-1  is the number of glyphs removed from string
-			for ($p = ($GlyphPos[0] + 1); $p < (count($this->OTLdata) + count($GlyphPos) - 1); $p++) {
+            //  $this->assocLigs = array(); // Ligatures[$posarr lpos] => nc
+            //  $this->assocMarks = array();    // assocMarks[$posarr mpos] => array(compID, ligPos)
+            // Update position of pre-existing Ligatures and associated Marks
+            // Start after first GlyphPos
+            // count($GlyphPos)-1  is the number of glyphs removed from string
+            for ($p = ($GlyphPos[0] + 1); $p < (count($this->OTLdata) + count($GlyphPos) - 1); $p++) {
 				$nrem = 0; // Number of Glyphs removed at this point in the string
 				for ($i = 0; $i < count($GlyphPos); $i++) {
 					if ($i > 0 && $p > $GlyphPos[$i]) {
@@ -2705,10 +2675,9 @@ class Otl
 					$this->assocMarks[($p - $nrem)] = $tmp;
 				}
 			}
-			return 1;
-		} else {
-			return 0;
-		}
+            return 1;
+        }
+        return 0;
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -2900,7 +2869,7 @@ class Otl
 		}
 	}
 
-	private function get_arab_glyphs($char, $type, &$chars, $i, $scriptTag, $usetags)
+	private function get_arab_glyphs($char, $type, array &$chars, $i, $scriptTag, $usetags)
 	{
 		// Optional Feature settings    // doesn't control Syriac at present
 		if (($type === 0 && strpos($usetags, 'isol') === false) || ($type === 1 && strpos($usetags, 'fina') === false) || ($type === 2 && strpos($usetags, 'init') === false) || ($type === 3 && strpos($usetags, 'medi') === false)) {
@@ -2933,9 +2902,8 @@ class Otl
 			}
 			if ($retk != -1) {
 				return [$this->arabGlyphs[$char][$retk], $retk];
-			} else {
-				return [$char, 0];
 			}
+            return [$char, 0];
 		}
 
 		if (($type > 0 || $type === 0) && isset($this->arabGlyphs[$char][$type])) {
@@ -2984,12 +2952,10 @@ class Otl
 			}
 			if ($match) {
 				return [$this->arabGlyphs[$char][$retk], $retk];
-			} else {
-				return [$char, 0];
 			}
-		} else {
-			return [$char, 0];
+            return [$char, 0];
 		}
+        return [$char, 0];
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -3139,10 +3105,9 @@ class Otl
 					}
 					$dictptr++;
 					continue;
-				} else {
-//echo "DICT_NODE_TYPE_LINEAR NOT: ".dechex($c).'<br />';
-					return $matches;
 				}
+                //echo "DICT_NODE_TYPE_LINEAR NOT: ".dechex($c).'<br />';
+                return $matches;
 			} elseif ($x == static::_DICT_NODE_TYPE_SPLIT) {
 //echo "DICT_NODE_TYPE_SPLIT ON ".dechex($d).": ".dechex($c).'<br />';
 				$dictptr++;
@@ -3167,7 +3132,7 @@ class Otl
 	////////////////////////////////////////////////////////////////
 	//////////       GPOS    ///////////////////////////////////////
 	////////////////////////////////////////////////////////////////
-	private function _applyGPOSrules($LookupList, $is_old_spec = false)
+	private function _applyGPOSrules(array $LookupList, $is_old_spec = false)
 	{
 		foreach ($LookupList as $lu => $tag) {
 			$Type = $this->GPOSLookups[$lu]['Type'];
@@ -3183,17 +3148,20 @@ class Otl
 				$currGID = $this->OTLdata[$ptr]['uni'];
 				$shift = 1;
 				foreach ($this->GPOSLookups[$lu]['Subtables'] as $c => $subtable_offset) {
-					// NB Coverage only looks at glyphs for position 1 (esp. 7.3 and 8.3)
-					if (isset($this->LuCoverage[$lu][$c][$currGID])) {
-						// Get rules from font GPOS subtable
-						if (isset($this->OTLdata[$ptr]['bidi_type'])) {  // No need to check bidi_type - just a check that it exists
-							$shift = $this->_applyGPOSsubtable($lu, $c, $ptr, $currGlyph, $currGID, ($subtable_offset - $this->GPOS_offset + $this->GSUB_length), $Type, $Flag, $MarkFilteringSet, $this->LuCoverage[$lu][$c], $tag, 0, $is_old_spec);
-							if ($shift) {
+                    // NB Coverage only looks at glyphs for position 1 (esp. 7.3 and 8.3)
+                    if (!isset($this->LuCoverage[$lu][$c][$currGID])) {
+                        continue;
+                    }
+                    // Get rules from font GPOS subtable
+                    if (!isset($this->OTLdata[$ptr]['bidi_type'])) {
+                        continue;
+                    }
+                    // No need to check bidi_type - just a check that it exists
+                    $shift = $this->_applyGPOSsubtable($lu, $c, $ptr, $currGlyph, $currGID, ($subtable_offset - $this->GPOS_offset + $this->GSUB_length), $Type, $Flag, $MarkFilteringSet, $this->LuCoverage[$lu][$c], $tag, 0, $is_old_spec);
+                    if ($shift) {
 								break;
 							}
-						}
-					}
-				}
+                }
 				if ($shift == 0) {
 					$shift = 1;
 				}
@@ -3214,7 +3182,7 @@ class Otl
 	// Lookup Type 8: Chaining Contextual Positioning Subtable      Position one or more glyphs in chained context
 	// Lookup Type 9: Extension positioning
 	//////////////////////////////////////////////////////////////////////////////////
-	private function _applyGPOSvaluerecord($basepos, $Value)
+	private function _applyGPOSvaluerecord($basepos, array $Value)
 	{
 
 		// If current glyph is a mark with a defined width, any XAdvance is considered to REPLACE the character Advance Width
@@ -3283,7 +3251,7 @@ class Otl
 		return $pos;
 	}
 
-	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, $LuCoverage, $tag, $level, $is_old_spec)
+	private function _applyGPOSsubtable($lookupID, $subtable, $ptr, $currGlyph, $currGID, $subtable_offset, $Type, $Flag, $MarkFilteringSet, array $LuCoverage, $tag, $level, $is_old_spec)
 	{
 		if (($Flag & 0x0001) == 1) {
 			$dir = 'RTL';
@@ -3291,20 +3259,19 @@ class Otl
 			$dir = 'LTR';
 		}
 
-		$ignore = $this->_getGCOMignoreString($Flag, $MarkFilteringSet);
+		$ignore = $this->_getGCOMignoreString($Flag);
 
 		// Lets start
 		$this->seek($subtable_offset);
 		$PosFormat = $this->read_ushort();
-
-		////////////////////////////////////////////////////////////////////////////////
-		// LookupType 1: Single adjustment  Adjust position of a single glyph (e.g. SmallCaps/Sups/Subs)
-		////////////////////////////////////////////////////////////////////////////////
-		if ($Type == 1) {
-			//===========
-			// Format 1:
-			//===========
-			if ($PosFormat == 1) {
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 1: Single adjustment  Adjust position of a single glyph (e.g. SmallCaps/Sups/Subs)
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 1) {
+            //===========
+            // Format 1:
+            //===========
+            if ($PosFormat == 1) {
 				$Coverage = $subtable_offset + $this->read_ushort();
 				$ValueFormat = $this->read_ushort();
 				$Value = $this->_getValueRecord($ValueFormat);
@@ -3319,29 +3286,31 @@ class Otl
 				$this->skip($GlyphPos * 2 * $this->count_bits($ValueFormat));
 				$Value = $this->_getValueRecord($ValueFormat);
 			}
-			$this->_applyGPOSvaluerecord($ptr, $Value);
-			if ($this->debugOTL) {
+            $this->_applyGPOSvaluerecord($ptr, $Value);
+            if ($this->debugOTL) {
 				$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
 			}
-			return 1;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 2: Pair adjustment    Adjust position of a pair of glyphs (Kerning)
+            return 1;
+        }
+
 		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 2) {
-			$Coverage = $subtable_offset + $this->read_ushort();
-			$ValueFormat1 = $this->read_ushort();
-			$ValueFormat2 = $this->read_ushort();
-			$sizeOfPair = ( 2 * $this->count_bits($ValueFormat1) ) + ( 2 * $this->count_bits($ValueFormat2) );
-			//===========
-			// Format 1:
-			//===========
-			if ($PosFormat == 1) {
-				$PairSetCount = $this->read_ushort();
-				$PairSetOffset = [];
-				for ($p = 0; $p < $PairSetCount; $p++) {
+        // LookupType 2: Pair adjustment    Adjust position of a pair of glyphs (Kerning)
+        ////////////////////////////////////////////////////////////////////////////////
+        if ($Type == 2) {
+            $Coverage = $subtable_offset + $this->read_ushort();
+            $ValueFormat1 = $this->read_ushort();
+            $ValueFormat2 = $this->read_ushort();
+            $sizeOfPair = ( 2 * $this->count_bits($ValueFormat1) ) + ( 2 * $this->count_bits($ValueFormat2) );
+            //===========
+            // Format 1:
+            //===========
+            if ($PosFormat == 1) {
+                $PairSetCount = $this->read_ushort();
+                $PairSetOffset = [];
+                for ($p = 0; $p < $PairSetCount; $p++) {
 					$PairSetOffset[] = $subtable_offset + $this->read_ushort();
 				}
-				for ($p = 0; $p < $PairSetCount; $p++) {
+                for ($p = 0; $p < $PairSetCount; $p++) {
 					if (isset($LuCoverage[$currGID]) && $LuCoverage[$currGID] == $p) {
 						$this->seek($PairSetOffset[$p]);
 						//PairSet table
@@ -3380,49 +3349,46 @@ class Otl
 									$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
 								}
 								return $matchedpos - $ptr;
-							} else {
-								$this->skip($sizeOfPair);
 							}
+                            $this->skip($sizeOfPair);
 						}
 					}
 				}
-				return 0;
-			} //===========
-			// Format 2:
-			//===========
-			elseif ($PosFormat == 2) {
-				$ClassDef1 = $subtable_offset + $this->read_ushort();
-				$ClassDef2 = $subtable_offset + $this->read_ushort();
-				$Class1Count = $this->read_ushort();
-				$Class2Count = $this->read_ushort();
-
-				$sizeOfValueRecords = $Class1Count * $Class2Count * $sizeOfPair;
-
-				//$this->skip($sizeOfValueRecords );  ???? NOT NEEDED
-				// NB Class1Count includes Class 0 even though it is not defined by $ClassDef1
-				// i.e. Class1Count = 5; Class1 will contain array(indices 1-4);
-				$Class1 = $this->_getClassDefinitionTable($ClassDef1);
-				$Class2 = $this->_getClassDefinitionTable($ClassDef2);
-				$FirstGlyph = $this->OTLdata[$ptr]['uni'];
-				$checkpos = $ptr;
-				$checkpos++;
-				while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
+                return 0;
+            }
+            //===========
+            // Format 2:
+            //===========
+            if ($PosFormat == 2) {
+                $ClassDef1 = $subtable_offset + $this->read_ushort();
+                $ClassDef2 = $subtable_offset + $this->read_ushort();
+                $Class1Count = $this->read_ushort();
+                $Class2Count = $this->read_ushort();
+                $sizeOfValueRecords = $Class1Count * $Class2Count * $sizeOfPair;
+                //$this->skip($sizeOfValueRecords );  ???? NOT NEEDED
+                // NB Class1Count includes Class 0 even though it is not defined by $ClassDef1
+                // i.e. Class1Count = 5; Class1 will contain array(indices 1-4);
+                $Class1 = $this->_getClassDefinitionTable($ClassDef1);
+                $Class2 = $this->_getClassDefinitionTable($ClassDef2);
+                $FirstGlyph = $this->OTLdata[$ptr]['uni'];
+                $checkpos = $ptr;
+                $checkpos++;
+                while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 					$checkpos++;
 				}
-				if (isset($this->OTLdata[$checkpos])) {
+                if (isset($this->OTLdata[$checkpos])) {
 					$matchedpos = $checkpos;
 				} else {
 					return 0;
 				}
-
-				$SecondGlyph = $this->OTLdata[$matchedpos]['uni'];
-				for ($i = 0; $i < $Class1Count; $i++) {
+                $SecondGlyph = $this->OTLdata[$matchedpos]['uni'];
+                for ($i = 0; $i < $Class1Count; $i++) {
 					if (isset($Class1[$i]) && count($Class1[$i])) {
 						$FirstClassPos = array_search($FirstGlyph, $Class1[$i]);
 						if ($FirstClassPos === false) {
 							continue;
-						} else {
-							for ($j = 0; $j < $Class2Count; $j++) {
+						}
+                        for ($j = 0; $j < $Class2Count; $j++) {
 								if (isset($Class2[$j]) && count($Class2[$j])) {
 									$SecondClassPos = array_search($SecondGlyph, $Class2[$j]);
 									if ($SecondClassPos === false) {
@@ -3451,480 +3417,28 @@ class Otl
 									return $matchedpos - $ptr;
 								}
 							}
-						}
 					}
 				}
-				return 0;
-			}
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 3: Cursive attachment     Attach cursive glyphs
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 3) {
-			$this->skip(4);
-			// Need default XAdvance for glyph
-			$pdfWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], hexdec($currGlyph)); // DON'T convert back to design units
-
-			$CPos = $LuCoverage[$currGID];
-			$this->skip($CPos * 4);
-			$EntryAnchor = $this->read_ushort();
-			$ExitAnchor = $this->read_ushort();
-			if ($EntryAnchor != 0) {
-				$EntryAnchor += $subtable_offset;
-				list($x, $y) = $this->_getAnchorTable($EntryAnchor);
-				if ($dir == 'RTL') {
-					if (round($pdfWidth) == round($x * 1000 / $this->mpdf->CurrentFont['unitsPerEm'])) {
-						$x = 0;
-					} else {
-						$x = $x - ($pdfWidth * $this->mpdf->CurrentFont['unitsPerEm'] / 1000);
-					}
-				}
-
-				$this->Entry[$ptr] = ['X' => $x, 'Y' => $y, 'dir' => $dir];
-			}
-			if ($ExitAnchor != 0) {
-				$ExitAnchor += $subtable_offset;
-				list($x, $y) = $this->_getAnchorTable($ExitAnchor);
-				if ($dir == 'LTR') {
-					if (round($pdfWidth) == round($x * 1000 / $this->mpdf->CurrentFont['unitsPerEm'])) {
-						$x = 0;
-					} else {
-						$x = $x - ($pdfWidth * $this->mpdf->CurrentFont['unitsPerEm'] / 1000);
-					}
-				}
-				$this->Exit[$ptr] = ['X' => $x, 'Y' => $y, 'dir' => $dir];
-			}
-			if ($this->debugOTL) {
-				$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
-			}
-			return 1;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 4: MarkToBase attachment  Attach a combining mark to a base glyph
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 4) {
-			$MarkCoverage = $subtable_offset + $this->read_ushort();
-			//$MarkCoverage is already set in $LuCoverage 00065|00073 etc
-			$BaseCoverage = $subtable_offset + $this->read_ushort();
-			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = Number of mark glyphs in the MarkCoverage table
-			$MarkArray = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
-			$BaseArray = $subtable_offset + $this->read_ushort(); // Offset to BaseArray table
-
-			$this->seek($BaseCoverage);
-			$BaseGlyphs = implode('|', $this->_getCoverage());
-
-			$checkpos = $ptr;
-			$checkpos--;
-
-			// ZZZ93
-			// In Lohit-Kannada font (old-spec), rules specify a Type 4 GPOS to attach below-forms to base glyph
-			// the repositioning does not happen in MS Word, and shouldn't happen comparing with other fonts
-			// ?Why not
-			// This Fix blocks the GPOS rule if the "mark" is not actually classified as a mark in the GlyphClasses of GDEF
-			// but only in Indic old-spec.
-			// Test cases: &#xca8;&#xccd;&#xca8;&#xcc1; and &#xc95;&#xccd;&#xcb0;&#xccc;
-			if ($this->shaper == 'I' && $is_old_spec && strpos($this->GlyphClassMarks, $this->OTLdata[$ptr]['hex']) === false) {
-				return;
-			}
-
-
-			// "To identify the base glyph that combines with a mark, the text-processing client must look backward in the glyph string from the mark to the preceding base glyph."
-			while (isset($this->OTLdata[$checkpos]) && strpos($this->GlyphClassMarks, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$checkpos--;
-			}
-
-			if (isset($this->OTLdata[$checkpos]) && strpos($BaseGlyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$matchedpos = $checkpos;
-			} else {
-				$matchedpos = false;
-			}
-
-			if ($matchedpos !== false) {
-				// Get the relevant MarkRecord
-				$MarkPos = $LuCoverage[$currGID];
-				$MarkRecord = $this->_getMarkRecord($MarkArray, $MarkPos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
-				//Mark Class is = $MarkRecord['Class']
-				// Get the relevant BaseRecord
-				$this->seek($BaseArray);
-				$BaseCount = $this->read_ushort();
-				$BasePos = strpos($BaseGlyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
-
-				// Move to the BaseRecord we want
-				$nSkip = (2 * $BasePos * $ClassCount );
-				$this->skip($nSkip);
-
-				// Read BaseRecord we want for appropriate Class
-				$nSkip = 2 * $MarkRecord['Class'];
-				$this->skip($nSkip);
-				$BaseRecordOffset = $BaseArray + $this->read_ushort();
-				list($x, $y) = $this->_getAnchorTable($BaseRecordOffset);
-				$BaseRecord = ['AnchorX' => $x, 'AnchorY' => $y]; // e.g. Array ( [AnchorX] => 660 [AnchorY] => 1556 )
-				// Need default XAdvance for Base glyph
-				$BaseWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
-				$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $BaseWidth;
-				// And any intervening (ignored) characters
-				if (($ptr - $matchedpos) > 1) {
-					for ($i = $matchedpos + 1; $i < $ptr; $i++) {
-						$BaseWidthExtra = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$i]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
-						$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] += $BaseWidthExtra;
-					}
-				}
-
-				// Align to previous Glyph by attachment - so need to add to previous placement values
-				$prevXPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'] : 0);
-				$prevYPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'] : 0);
-
-				$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $BaseRecord['AnchorX'] - $MarkRecord['AnchorX'];
-				$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $BaseRecord['AnchorY'] - $MarkRecord['AnchorY'];
-				if ($this->debugOTL) {
-					$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
-				}
-				return 1;
-			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 5: MarkToLigature attachment  Attach a combining mark to a ligature
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 5) {
-			$MarkCoverage = $subtable_offset + $this->read_ushort();
-			//$MarkCoverage is already set in $LuCoverage 00065|00073 etc
-			$LigatureCoverage = $subtable_offset + $this->read_ushort();
-			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = Number of mark glyphs in the MarkCoverage table
-			$MarkArray = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
-			$LigatureArray = $subtable_offset + $this->read_ushort(); // Offset to LigatureArray table
-
-			$this->seek($LigatureCoverage);
-			$LigatureGlyphs = implode('|', $this->_getCoverage());
-
-
-			$checkpos = $ptr;
-			$checkpos--;
-
-			// "To position a combining mark using a MarkToLigature attachment subtable, the text-processing client must work backward from the mark to the preceding ligature glyph."
-			while (isset($this->OTLdata[$checkpos]) && strpos($this->GlyphClassMarks, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$checkpos--;
-			}
-
-			if (isset($this->OTLdata[$checkpos]) && strpos($LigatureGlyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$matchedpos = $checkpos;
-			} else {
-				$matchedpos = false;
-			}
-
-			if ($matchedpos !== false) {
-				// Get the relevant MarkRecord
-				$MarkPos = $LuCoverage[$currGID];
-				$MarkRecord = $this->_getMarkRecord($MarkArray, $MarkPos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
-				//Mark Class is = $MarkRecord['Class']
-				// Get the relevant LigatureRecord
-				$this->seek($LigatureArray);
-				$LigatureCount = $this->read_ushort();
-				$LigaturePos = strpos($LigatureGlyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
-
-				// Move to the LigatureAttach table Record we want
-				$nSkip = (2 * $LigaturePos);
-				$this->skip($nSkip);
-				$LigatureAttachOffset = $LigatureArray + $this->read_ushort();
-				$this->seek($LigatureAttachOffset);
-				$ComponentCount = $this->read_ushort();
-				$offsets = [];
-				for ($comp = 0; $comp < $ComponentCount; $comp++) {
-					// ComponentRecords
-					for ($class = 0; $class < $ClassCount; $class++) {
-						$offsets[$comp][$class] = $this->read_ushort();
-					}
-				}
-
-				// Get the specific component for this mark attachment
-				if (isset($this->assocLigs[$matchedpos]) && isset($this->assocMarks[$ptr]['ligPos']) && $this->assocMarks[$ptr]['ligPos'] == $matchedpos) {
-					$component = $this->assocMarks[$ptr]['compID'];
-				} else {
-					$component = $ComponentCount - 1;
-				}
-
-				$offset = $offsets[$component][$MarkRecord['Class']];
-				if ($offset != 0) {
-					$LigatureRecordOffset = $offset + $LigatureAttachOffset;
-					list($x, $y) = $this->_getAnchorTable($LigatureRecordOffset);
-					$LigatureRecord = ['AnchorX' => $x, 'AnchorY' => $y];
-
-					// Need default XAdvance for Ligature glyph
-					$LigatureWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
-					$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $LigatureWidth;
-					// And any intervening (ignored)characters
-					if (($ptr - $matchedpos) > 1) {
-						for ($i = $matchedpos + 1; $i < $ptr; $i++) {
-							$LigatureWidthExtra = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$i]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
-							$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] += $LigatureWidthExtra;
-						}
-					}
-
-					// Align to previous Ligature by attachment - so need to add to previous placement values
-					if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'])) {
-						$prevXPlacement = $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'];
-					} else {
-						$prevXPlacement = 0;
-					}
-					if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'])) {
-						$prevYPlacement = $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'];
-					} else {
-						$prevYPlacement = 0;
-					}
-
-					$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $LigatureRecord['AnchorX'] - $MarkRecord['AnchorX'];
-					$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $LigatureRecord['AnchorY'] - $MarkRecord['AnchorY'];
-					if ($this->debugOTL) {
-						$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
-					}
-					return 1;
-				}
-			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 6: MarkToMark attachment  Attach a combining mark to another mark
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 6) {
-			$Mark1Coverage = $subtable_offset + $this->read_ushort(); // Combining Mark
-			//$Mark1Coverage is already set in $LuCoverage 0065|0073 etc
-			$Mark2Coverage = $subtable_offset + $this->read_ushort(); // Base Mark
-			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = No. of Combining mark1 glyphs in the MarkCoverage table
-			$Mark1Array = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
-			$Mark2Array = $subtable_offset + $this->read_ushort(); // Offset to Mark2Array table
-			$this->seek($Mark2Coverage);
-			$Mark2Glyphs = implode('|', $this->_getCoverage());
-			$checkpos = $ptr;
-			$checkpos--;
-			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$checkpos--;
-			}
-			if (isset($this->OTLdata[$checkpos]) && strpos($Mark2Glyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
-				$matchedpos = $checkpos;
-			} else {
-				$matchedpos = false;
-			}
-
-			if ($matchedpos !== false) {
-				// Get the relevant MarkRecord
-				$Mark1Pos = $LuCoverage[$currGID];
-				$Mark1Record = $this->_getMarkRecord($Mark1Array, $Mark1Pos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
-				//Mark Class is = $Mark1Record['Class']
-				// Get the relevant Mark2Record
-				$this->seek($Mark2Array);
-				$Mark2Count = $this->read_ushort();
-				$Mark2Pos = strpos($Mark2Glyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
-
-				// Move to the Mark2Record we want
-				$nSkip = (2 * $Mark2Pos * $ClassCount );
-				$this->skip($nSkip);
-
-				// Read Mark2Record we want for appropriate Class
-				$nSkip = 2 * $Mark1Record['Class'];
-				$this->skip($nSkip);
-				$Mark2RecordOffset = $Mark2Array + $this->read_ushort();
-				list($x, $y) = $this->_getAnchorTable($Mark2RecordOffset);
-				$Mark2Record = ['AnchorX' => $x, 'AnchorY' => $y]; // e.g. Array ( [AnchorX] => 660 [AnchorY] => 1556 )
-				// Need default XAdvance for Mark2 glyph
-				$Mark2Width = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
-				// IF combining marks are set on different components of a ligature glyph, do not apply this rule
-				// Test: arabictypesetting: &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
-				// Test: arabictypesetting: &#x628;&#x651;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;
-				$prevLig = -1;
-				$thisLig = -1;
-				$prevComp = -1;
-				$thisComp = -1;
-				if (isset($this->assocMarks[$matchedpos])) {
-					$prevLig = $this->assocMarks[$matchedpos]['ligPos'];
-					$prevComp = $this->assocMarks[$matchedpos]['compID'];
-				}
-				if (isset($this->assocMarks[$ptr])) {
-					$thisLig = $this->assocMarks[$ptr]['ligPos'];
-					$thisComp = $this->assocMarks[$ptr]['compID'];
-				}
-
-				// However IF Mark2 (first in logical order, i.e. being attached to) is not associated with a base, carry on
-				// This happens in Indic when the Mark being attached to e.g. [Halant Ma lig] -> MatraU,  [U+0B4D + U+B2E as E0F5]-> U+0B41 become E135
-				if (!defined("OMIT_OTL_FIX_1") || OMIT_OTL_FIX_1 != 1) {
-					/* OTL_FIX_1 */
-					if (isset($this->assocMarks[$matchedpos]) && ($prevLig != $thisLig || $prevComp != $thisComp )) {
-						return 0;
-					}
-				} else {
-					/* Original code */
-					if ($prevLig != $thisLig || $prevComp != $thisComp) {
-						return 0;
-					}
-				}
-
-
-				if (!defined("OMIT_OTL_FIX_2") || OMIT_OTL_FIX_2 != 1) {
-					/* OTL_FIX_2 */
-					if (!isset($this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) || !$this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) {
-						$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $Mark2Width;
-					}
-				}
-
-				// ZZZ99Q - Test Case font-family: garuda &#xe19;&#xe49;&#xe33;
-				if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) && $this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) {
-					$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth'];
-				}
-
-				// Align to previous Mark by attachment - so need to add the previous placement values
-				$prevXPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'] : 0);
-				$prevYPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'] : 0);
-				$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $Mark2Record['AnchorX'] - $Mark1Record['AnchorX'];
-				$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $Mark2Record['AnchorY'] - $Mark1Record['AnchorY'];
-				if ($this->debugOTL) {
-					$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
-				}
-				return 1;
-			}
-			return 0;
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 7: Context positioning    Position one or more glyphs in context
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 7) {
+                return 0;
+            }
+        } elseif ($Type == 8) {
 			//===========
-			// Format 1:
-			//===========
-			if ($PosFormat == 1) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-			} //===========
-			// Format 2:
-			//===========
-			elseif ($PosFormat == 2) {
-				$CoverageTableOffset = $subtable_offset + $this->read_ushort();
-				$InputClassDefOffset = $subtable_offset + $this->read_ushort();
-				$PosClassSetCnt = $this->read_ushort();
-				$PosClassSetOffset = [];
-				for ($b = 0; $b < $PosClassSetCnt; $b++) {
-					$offset = $this->read_ushort();
-					if ($offset == 0x0000) {
-						$PosClassSetOffset[] = $offset;
-					} else {
-						$PosClassSetOffset[] = $subtable_offset + $offset;
-					}
-				}
-
-				$InputClasses = $this->_getClasses($InputClassDefOffset);
-
-				for ($s = 0; $s < $PosClassSetCnt; $s++) { // $ChainPosClassSet is ordered by input class-may be NULL
-					// Select $PosClassSet if currGlyph is in First Input Class
-					if ($PosClassSetOffset[$s] > 0 && isset($InputClasses[$s][$currGID])) {
-						$this->seek($PosClassSetOffset[$s]);
-						$PosClassRuleCnt = $this->read_ushort();
-						$PosClassRule = [];
-						for ($b = 0; $b < $PosClassRuleCnt; $b++) {
-							$PosClassRule[$b] = $PosClassSetOffset[$s] + $this->read_ushort();
-						}
-
-						for ($b = 0; $b < $PosClassRuleCnt; $b++) {  // EACH RULE
-							$this->seek($PosClassRule[$b]);
-							$InputGlyphCount = $this->read_ushort();
-							$PosCount = $this->read_ushort();
-
-							$Input = [];
-							for ($r = 1; $r < $InputGlyphCount; $r++) {
-								$Input[$r] = $this->read_ushort();
-							}
-							$inputClass = $s;
-
-							$inputGlyphs = [];
-							$inputGlyphs[0] = $InputClasses[$inputClass];
-
-							if ($InputGlyphCount > 1) {
-								//  NB starts at 1
-								for ($gcl = 1; $gcl < $InputGlyphCount; $gcl++) {
-									$classindex = $Input[$gcl];
-									if (isset($InputClasses[$classindex])) {
-										$inputGlyphs[$gcl] = $InputClasses[$classindex];
-									} else {
-										$inputGlyphs[$gcl] = '';
-									}
-								}
-							}
-
-							// Class 0 contains all the glyphs NOT in the other classes
-							$class0excl = [];
-							for ($gc = 1; $gc <= count($InputClasses); $gc++) {
-								if (is_array($InputClasses[$gc])) {
-									$class0excl = $class0excl + $InputClasses[$gc];
-								}
-							}
-
-							$backtrackGlyphs = [];
-							$lookaheadGlyphs = [];
-
-							$matched = $this->checkContextMatchMultipleUni($inputGlyphs, $backtrackGlyphs, $lookaheadGlyphs, $ignore, $ptr, $class0excl);
-							if ($matched) {
-								for ($p = 0; $p < $PosCount; $p++) { // EACH LOOKUP
-									$SequenceIndex[$p] = $this->read_ushort();
-									$LookupListIndex[$p] = $this->read_ushort();
-								}
-
-								for ($p = 0; $p < $PosCount; $p++) {
-									// Apply  $LookupListIndex  at   $SequenceIndex
-									if ($SequenceIndex[$p] >= $InputGlyphCount) {
-										continue;
-									}
-									$lu = $LookupListIndex[$p];
-									$luType = $this->GPOSLookups[$lu]['Type'];
-									$luFlag = $this->GPOSLookups[$lu]['Flag'];
-									$luMarkFilteringSet = $this->GPOSLookups[$lu]['MarkFilteringSet'];
-
-									$luptr = $matched[$SequenceIndex[$p]];
-									$lucurrGlyph = $this->OTLdata[$luptr]['hex'];
-									$lucurrGID = $this->OTLdata[$luptr]['uni'];
-
-									foreach ($this->GPOSLookups[$lu]['Subtables'] as $luc => $lusubtable_offset) {
-										$shift = $this->_applyGPOSsubtable($lu, $luc, $luptr, $lucurrGlyph, $lucurrGID, ($lusubtable_offset - $this->GPOS_offset + $this->GSUB_length), $luType, $luFlag, $luMarkFilteringSet, $this->LuCoverage[$lu][$luc], $tag, 1, $is_old_spec);
-										if ($this->debugOTL && $shift) {
-											$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
-										}
-										if ($shift) {
-											break;
-										}
-									}
-								}
-
-								if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
-									return $shift;
-								} /* OTL_FIX_3 */
-								else {
-									return $InputGlyphCount; // should be + matched ignores in Input Sequence
-								}
-							}
-						}
-					}
-				}
-
-				return 0;
-			} //===========
-			// Format 3:
-			//===========
-			elseif ($PosFormat == 3) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-			} else {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
-			}
-		} ////////////////////////////////////////////////////////////////////////////////
-		// LookupType 8: Chained Context positioning    Position one or more glyphs in chained context
-		////////////////////////////////////////////////////////////////////////////////
-		elseif ($Type == 8) {
-			//===========
-			// Format 1:
-			//===========
-			if ($PosFormat == 1) {
-				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
-				return 0;
-			} //===========
-			// Format 2:
-			//===========
-			elseif ($PosFormat == 2) {
-				$CoverageTableOffset = $subtable_offset + $this->read_ushort();
-				$BacktrackClassDefOffset = $subtable_offset + $this->read_ushort();
-				$InputClassDefOffset = $subtable_offset + $this->read_ushort();
-				$LookaheadClassDefOffset = $subtable_offset + $this->read_ushort();
-				$ChainPosClassSetCnt = $this->read_ushort();
-				$ChainPosClassSetOffset = [];
-				for ($b = 0; $b < $ChainPosClassSetCnt; $b++) {
+            // Format 1:
+            //===========
+            if ($PosFormat == 1) {
+                throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+            }
+            //===========
+            // Format 2:
+            //===========
+            if ($PosFormat == 2) {
+                $CoverageTableOffset = $subtable_offset + $this->read_ushort();
+                $BacktrackClassDefOffset = $subtable_offset + $this->read_ushort();
+                $InputClassDefOffset = $subtable_offset + $this->read_ushort();
+                $LookaheadClassDefOffset = $subtable_offset + $this->read_ushort();
+                $ChainPosClassSetCnt = $this->read_ushort();
+                $ChainPosClassSetOffset = [];
+                for ($b = 0; $b < $ChainPosClassSetCnt; $b++) {
 					$offset = $this->read_ushort();
 					if ($offset == 0x0000) {
 						$ChainPosClassSetOffset[] = $offset;
@@ -3932,12 +3446,10 @@ class Otl
 						$ChainPosClassSetOffset[] = $subtable_offset + $offset;
 					}
 				}
-
-				$BacktrackClasses = $this->_getClasses($BacktrackClassDefOffset);
-				$InputClasses = $this->_getClasses($InputClassDefOffset);
-				$LookaheadClasses = $this->_getClasses($LookaheadClassDefOffset);
-
-				for ($s = 0; $s < $ChainPosClassSetCnt; $s++) { // $ChainPosClassSet is ordered by input class-may be NULL
+                $BacktrackClasses = $this->_getClasses($BacktrackClassDefOffset);
+                $InputClasses = $this->_getClasses($InputClassDefOffset);
+                $LookaheadClasses = $this->_getClasses($LookaheadClassDefOffset);
+                for ($s = 0; $s < $ChainPosClassSetCnt; $s++) { // $ChainPosClassSet is ordered by input class-may be NULL
 					// Select $ChainPosClassSet if currGlyph is in First Input Class
 					if ($ChainPosClassSetOffset[$s] > 0 && isset($InputClasses[$s][$currGID])) {
 						$this->seek($ChainPosClassSetOffset[$s]);
@@ -4071,55 +3583,55 @@ class Otl
 
 								if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
 									return $shift;
-								} /* OTL_FIX_3 */
-								else {
-									return $InputGlyphCount; // should be + matched ignores in Input Sequence
 								}
+                                return $InputGlyphCount;
+                                // should be + matched ignores in Input Sequence
+
 							}
 						}
 					}
 				}
-
-				return 0;
-			} //===========
-			// Format 3:
-			//===========
-			elseif ($PosFormat == 3) {
-				$BacktrackGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
+                return 0;
+            }
+            //===========
+            // Format 3:
+            //===========
+            if ($PosFormat == 3) {
+                $BacktrackGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 					$CoverageBacktrackOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$InputGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $InputGlyphCount; $b++) {
+                $InputGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $InputGlyphCount; $b++) {
 					$CoverageInputOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$LookaheadGlyphCount = $this->read_ushort();
-				for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
+                $LookaheadGlyphCount = $this->read_ushort();
+                for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 					$CoverageLookaheadOffset[] = $subtable_offset + $this->read_ushort(); // in glyph sequence order
 				}
-				$PosCount = $this->read_ushort();
-				$save_pos = $this->_pos; // Save the point just after PosCount
-
-				$CoverageBacktrackGlyphs = [];
-				for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
+                $PosCount = $this->read_ushort();
+                $save_pos = $this->_pos;
+                // Save the point just after PosCount
+                $CoverageBacktrackGlyphs = [];
+                for ($b = 0; $b < $BacktrackGlyphCount; $b++) {
 					$this->seek($CoverageBacktrackOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageBacktrackGlyphs[$b] = implode("|", $glyphs);
 				}
-				$CoverageInputGlyphs = [];
-				for ($b = 0; $b < $InputGlyphCount; $b++) {
+                $CoverageInputGlyphs = [];
+                for ($b = 0; $b < $InputGlyphCount; $b++) {
 					$this->seek($CoverageInputOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageInputGlyphs[$b] = implode("|", $glyphs);
 				}
-				$CoverageLookaheadGlyphs = [];
-				for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
+                $CoverageLookaheadGlyphs = [];
+                for ($b = 0; $b < $LookaheadGlyphCount; $b++) {
 					$this->seek($CoverageLookaheadOffset[$b]);
 					$glyphs = $this->_getCoverage();
 					$CoverageLookaheadGlyphs[$b] = implode("|", $glyphs);
 				}
-				$matched = $this->checkContextMatchMultiple($CoverageInputGlyphs, $CoverageBacktrackGlyphs, $CoverageLookaheadGlyphs, $ignore, $ptr);
-				if ($matched) {
+                $matched = $this->checkContextMatchMultiple($CoverageInputGlyphs, $CoverageBacktrackGlyphs, $CoverageLookaheadGlyphs, $ignore, $ptr);
+                if ($matched) {
 					$this->seek($save_pos); // Return to just after PosCount
 					for ($p = 0; $p < $PosCount; $p++) {
 						// PosLookupRecord
@@ -4155,10 +3667,463 @@ class Otl
 						}
 					}
 				}
-			} else {
+            }
+            else {
 				throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
 			}
-		} else {
+		}
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 3: Cursive attachment     Attach cursive glyphs
+        ////////////////////////////////////////////////////////////////////////////////
+        elseif ($Type == 3) {
+			$this->skip(4);
+			// Need default XAdvance for glyph
+			$pdfWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], hexdec($currGlyph)); // DON'T convert back to design units
+
+			$CPos = $LuCoverage[$currGID];
+			$this->skip($CPos * 4);
+			$EntryAnchor = $this->read_ushort();
+			$ExitAnchor = $this->read_ushort();
+			if ($EntryAnchor != 0) {
+				$EntryAnchor += $subtable_offset;
+				list($x, $y) = $this->_getAnchorTable($EntryAnchor);
+				if ($dir == 'RTL') {
+					if (round($pdfWidth) == round($x * 1000 / $this->mpdf->CurrentFont['unitsPerEm'])) {
+						$x = 0;
+					} else {
+						$x = $x - ($pdfWidth * $this->mpdf->CurrentFont['unitsPerEm'] / 1000);
+					}
+				}
+
+				$this->Entry[$ptr] = ['X' => $x, 'Y' => $y, 'dir' => $dir];
+			}
+			if ($ExitAnchor != 0) {
+				$ExitAnchor += $subtable_offset;
+				list($x, $y) = $this->_getAnchorTable($ExitAnchor);
+				if ($dir == 'LTR') {
+					if (round($pdfWidth) == round($x * 1000 / $this->mpdf->CurrentFont['unitsPerEm'])) {
+						$x = 0;
+					} else {
+						$x = $x - ($pdfWidth * $this->mpdf->CurrentFont['unitsPerEm'] / 1000);
+					}
+				}
+				$this->Exit[$ptr] = ['X' => $x, 'Y' => $y, 'dir' => $dir];
+			}
+			if ($this->debugOTL) {
+				$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
+			}
+			return 1;
+		}
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 4: MarkToBase attachment  Attach a combining mark to a base glyph
+        ////////////////////////////////////////////////////////////////////////////////
+        elseif ($Type == 4) {
+			$MarkCoverage = $subtable_offset + $this->read_ushort();
+			//$MarkCoverage is already set in $LuCoverage 00065|00073 etc
+			$BaseCoverage = $subtable_offset + $this->read_ushort();
+			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = Number of mark glyphs in the MarkCoverage table
+			$MarkArray = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
+			$BaseArray = $subtable_offset + $this->read_ushort(); // Offset to BaseArray table
+
+			$this->seek($BaseCoverage);
+			$BaseGlyphs = implode('|', $this->_getCoverage());
+
+			$checkpos = $ptr;
+			$checkpos--;
+
+			// ZZZ93
+			// In Lohit-Kannada font (old-spec), rules specify a Type 4 GPOS to attach below-forms to base glyph
+			// the repositioning does not happen in MS Word, and shouldn't happen comparing with other fonts
+			// ?Why not
+			// This Fix blocks the GPOS rule if the "mark" is not actually classified as a mark in the GlyphClasses of GDEF
+			// but only in Indic old-spec.
+			// Test cases: &#xca8;&#xccd;&#xca8;&#xcc1; and &#xc95;&#xccd;&#xcb0;&#xccc;
+			if ($this->shaper == 'I' && $is_old_spec && strpos($this->GlyphClassMarks, $this->OTLdata[$ptr]['hex']) === false) {
+				return;
+			}
+
+
+			// "To identify the base glyph that combines with a mark, the text-processing client must look backward in the glyph string from the mark to the preceding base glyph."
+			while (isset($this->OTLdata[$checkpos]) && strpos($this->GlyphClassMarks, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$checkpos--;
+			}
+
+			if (isset($this->OTLdata[$checkpos]) && strpos($BaseGlyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$matchedpos = $checkpos;
+			} else {
+				$matchedpos = false;
+			}
+
+			if ($matchedpos !== false) {
+				// Get the relevant MarkRecord
+				$MarkPos = $LuCoverage[$currGID];
+				$MarkRecord = $this->_getMarkRecord($MarkArray, $MarkPos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
+				//Mark Class is = $MarkRecord['Class']
+				// Get the relevant BaseRecord
+				$this->seek($BaseArray);
+				$BaseCount = $this->read_ushort();
+				$BasePos = strpos($BaseGlyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
+
+				// Move to the BaseRecord we want
+				$nSkip = (2 * $BasePos * $ClassCount );
+				$this->skip($nSkip);
+
+				// Read BaseRecord we want for appropriate Class
+				$nSkip = 2 * $MarkRecord['Class'];
+				$this->skip($nSkip);
+				$BaseRecordOffset = $BaseArray + $this->read_ushort();
+				list($x, $y) = $this->_getAnchorTable($BaseRecordOffset);
+				$BaseRecord = ['AnchorX' => $x, 'AnchorY' => $y]; // e.g. Array ( [AnchorX] => 660 [AnchorY] => 1556 )
+				// Need default XAdvance for Base glyph
+				$BaseWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
+				$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $BaseWidth;
+				// And any intervening (ignored) characters
+				if (($ptr - $matchedpos) > 1) {
+					for ($i = $matchedpos + 1; $i < $ptr; $i++) {
+						$BaseWidthExtra = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$i]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
+						$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] += $BaseWidthExtra;
+					}
+				}
+
+				// Align to previous Glyph by attachment - so need to add to previous placement values
+				$prevXPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'] : 0);
+				$prevYPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'] : 0);
+
+				$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $BaseRecord['AnchorX'] - $MarkRecord['AnchorX'];
+				$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $BaseRecord['AnchorY'] - $MarkRecord['AnchorY'];
+				if ($this->debugOTL) {
+					$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
+				}
+				return 1;
+			}
+			return 0;
+		}
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 5: MarkToLigature attachment  Attach a combining mark to a ligature
+        ////////////////////////////////////////////////////////////////////////////////
+        elseif ($Type == 5) {
+			$MarkCoverage = $subtable_offset + $this->read_ushort();
+			//$MarkCoverage is already set in $LuCoverage 00065|00073 etc
+			$LigatureCoverage = $subtable_offset + $this->read_ushort();
+			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = Number of mark glyphs in the MarkCoverage table
+			$MarkArray = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
+			$LigatureArray = $subtable_offset + $this->read_ushort(); // Offset to LigatureArray table
+
+			$this->seek($LigatureCoverage);
+			$LigatureGlyphs = implode('|', $this->_getCoverage());
+
+
+			$checkpos = $ptr;
+			$checkpos--;
+
+			// "To position a combining mark using a MarkToLigature attachment subtable, the text-processing client must work backward from the mark to the preceding ligature glyph."
+			while (isset($this->OTLdata[$checkpos]) && strpos($this->GlyphClassMarks, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$checkpos--;
+			}
+
+			if (isset($this->OTLdata[$checkpos]) && strpos($LigatureGlyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$matchedpos = $checkpos;
+			} else {
+				$matchedpos = false;
+			}
+
+			if ($matchedpos !== false) {
+				// Get the relevant MarkRecord
+				$MarkPos = $LuCoverage[$currGID];
+				$MarkRecord = $this->_getMarkRecord($MarkArray, $MarkPos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
+				//Mark Class is = $MarkRecord['Class']
+				// Get the relevant LigatureRecord
+				$this->seek($LigatureArray);
+				$LigatureCount = $this->read_ushort();
+				$LigaturePos = strpos($LigatureGlyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
+
+				// Move to the LigatureAttach table Record we want
+				$nSkip = (2 * $LigaturePos);
+				$this->skip($nSkip);
+				$LigatureAttachOffset = $LigatureArray + $this->read_ushort();
+				$this->seek($LigatureAttachOffset);
+				$ComponentCount = $this->read_ushort();
+				$offsets = [];
+				for ($comp = 0; $comp < $ComponentCount; $comp++) {
+					// ComponentRecords
+					for ($class = 0; $class < $ClassCount; $class++) {
+						$offsets[$comp][$class] = $this->read_ushort();
+					}
+				}
+
+				// Get the specific component for this mark attachment
+				if (isset($this->assocLigs[$matchedpos]) && isset($this->assocMarks[$ptr]['ligPos']) && $this->assocMarks[$ptr]['ligPos'] == $matchedpos) {
+					$component = $this->assocMarks[$ptr]['compID'];
+				} else {
+					$component = $ComponentCount - 1;
+				}
+
+				$offset = $offsets[$component][$MarkRecord['Class']];
+				if ($offset != 0) {
+					$LigatureRecordOffset = $offset + $LigatureAttachOffset;
+					list($x, $y) = $this->_getAnchorTable($LigatureRecordOffset);
+					$LigatureRecord = ['AnchorX' => $x, 'AnchorY' => $y];
+
+					// Need default XAdvance for Ligature glyph
+					$LigatureWidth = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
+					$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $LigatureWidth;
+					// And any intervening (ignored)characters
+					if (($ptr - $matchedpos) > 1) {
+						for ($i = $matchedpos + 1; $i < $ptr; $i++) {
+							$LigatureWidthExtra = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$i]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
+							$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] += $LigatureWidthExtra;
+						}
+					}
+
+					// Align to previous Ligature by attachment - so need to add to previous placement values
+					if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'])) {
+						$prevXPlacement = $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'];
+					} else {
+						$prevXPlacement = 0;
+					}
+					if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'])) {
+						$prevYPlacement = $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'];
+					} else {
+						$prevYPlacement = 0;
+					}
+
+					$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $LigatureRecord['AnchorX'] - $MarkRecord['AnchorX'];
+					$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $LigatureRecord['AnchorY'] - $MarkRecord['AnchorY'];
+					if ($this->debugOTL) {
+						$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
+					}
+					return 1;
+				}
+			}
+			return 0;
+		}
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 6: MarkToMark attachment  Attach a combining mark to another mark
+        ////////////////////////////////////////////////////////////////////////////////
+        elseif ($Type == 6) {
+			$Mark1Coverage = $subtable_offset + $this->read_ushort(); // Combining Mark
+			//$Mark1Coverage is already set in $LuCoverage 0065|0073 etc
+			$Mark2Coverage = $subtable_offset + $this->read_ushort(); // Base Mark
+			$ClassCount = $this->read_ushort(); // Number of classes defined for marks = No. of Combining mark1 glyphs in the MarkCoverage table
+			$Mark1Array = $subtable_offset + $this->read_ushort(); // Offset to MarkArray table
+			$Mark2Array = $subtable_offset + $this->read_ushort(); // Offset to Mark2Array table
+			$this->seek($Mark2Coverage);
+			$Mark2Glyphs = implode('|', $this->_getCoverage());
+			$checkpos = $ptr;
+			$checkpos--;
+			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$checkpos--;
+			}
+			if (isset($this->OTLdata[$checkpos]) && strpos($Mark2Glyphs, $this->OTLdata[$checkpos]['hex']) !== false) {
+				$matchedpos = $checkpos;
+			} else {
+				$matchedpos = false;
+			}
+
+			if ($matchedpos !== false) {
+				// Get the relevant MarkRecord
+				$Mark1Pos = $LuCoverage[$currGID];
+				$Mark1Record = $this->_getMarkRecord($Mark1Array, $Mark1Pos); // e.g. Array ( [Class] => 0 [AnchorX] => -549 [AnchorY] => 1548 )
+				//Mark Class is = $Mark1Record['Class']
+				// Get the relevant Mark2Record
+				$this->seek($Mark2Array);
+				$Mark2Count = $this->read_ushort();
+				$Mark2Pos = strpos($Mark2Glyphs, $this->OTLdata[$matchedpos]['hex']) / 6;
+
+				// Move to the Mark2Record we want
+				$nSkip = (2 * $Mark2Pos * $ClassCount );
+				$this->skip($nSkip);
+
+				// Read Mark2Record we want for appropriate Class
+				$nSkip = 2 * $Mark1Record['Class'];
+				$this->skip($nSkip);
+				$Mark2RecordOffset = $Mark2Array + $this->read_ushort();
+				list($x, $y) = $this->_getAnchorTable($Mark2RecordOffset);
+				$Mark2Record = ['AnchorX' => $x, 'AnchorY' => $y]; // e.g. Array ( [AnchorX] => 660 [AnchorY] => 1556 )
+				// Need default XAdvance for Mark2 glyph
+				$Mark2Width = $this->mpdf->_getCharWidth($this->mpdf->CurrentFont['cw'], $this->OTLdata[$matchedpos]['uni']) * $this->mpdf->CurrentFont['unitsPerEm'] / 1000; // convert back to font design units
+				// IF combining marks are set on different components of a ligature glyph, do not apply this rule
+				// Test: arabictypesetting: &#x625;&#x650;&#x644;&#x64e;&#x649;&#x670;&#x653;
+				// Test: arabictypesetting: &#x628;&#x651;&#x64e;&#x64a;&#x652;&#x646;&#x64e;&#x643;&#x64f;&#x645;&#x652;
+				$prevLig = -1;
+				$thisLig = -1;
+				$prevComp = -1;
+				$thisComp = -1;
+				if (isset($this->assocMarks[$matchedpos])) {
+					$prevLig = $this->assocMarks[$matchedpos]['ligPos'];
+					$prevComp = $this->assocMarks[$matchedpos]['compID'];
+				}
+				if (isset($this->assocMarks[$ptr])) {
+					$thisLig = $this->assocMarks[$ptr]['ligPos'];
+					$thisComp = $this->assocMarks[$ptr]['compID'];
+				}
+
+				// However IF Mark2 (first in logical order, i.e. being attached to) is not associated with a base, carry on
+				// This happens in Indic when the Mark being attached to e.g. [Halant Ma lig] -> MatraU,  [U+0B4D + U+B2E as E0F5]-> U+0B41 become E135
+				if (!defined("OMIT_OTL_FIX_1") || OMIT_OTL_FIX_1 != 1) {
+					/* OTL_FIX_1 */
+					if (isset($this->assocMarks[$matchedpos]) && ($prevLig != $thisLig || $prevComp != $thisComp )) {
+						return 0;
+					}
+				} else {
+					/* Original code */
+					if ($prevLig != $thisLig || $prevComp != $thisComp) {
+						return 0;
+					}
+				}
+
+
+				if (!defined("OMIT_OTL_FIX_2") || OMIT_OTL_FIX_2 != 1) {
+					/* OTL_FIX_2 */
+					if (!isset($this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) || !$this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) {
+						$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $Mark2Width;
+					}
+				}
+
+				// ZZZ99Q - Test Case font-family: garuda &#xe19;&#xe49;&#xe33;
+				if (isset($this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) && $this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth']) {
+					$this->OTLdata[$ptr]['GPOSinfo']['BaseWidth'] = $this->OTLdata[$matchedpos]['GPOSinfo']['BaseWidth'];
+				}
+
+				// Align to previous Mark by attachment - so need to add the previous placement values
+				$prevXPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['XPlacement'] : 0);
+				$prevYPlacement = (isset($this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement']) ? $this->OTLdata[$matchedpos]['GPOSinfo']['YPlacement'] : 0);
+				$this->OTLdata[$ptr]['GPOSinfo']['XPlacement'] = $prevXPlacement + $Mark2Record['AnchorX'] - $Mark1Record['AnchorX'];
+				$this->OTLdata[$ptr]['GPOSinfo']['YPlacement'] = $prevYPlacement + $Mark2Record['AnchorY'] - $Mark1Record['AnchorY'];
+				if ($this->debugOTL) {
+					$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
+				}
+				return 1;
+			}
+			return 0;
+		}
+        ////////////////////////////////////////////////////////////////////////////////
+        // LookupType 7: Context positioning    Position one or more glyphs in context
+        ////////////////////////////////////////////////////////////////////////////////
+        elseif ($Type == 7) {
+			//===========
+            // Format 1:
+            //===========
+            if ($PosFormat == 1) {
+                throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+            }
+            //===========
+            // Format 2:
+            //===========
+            if ($PosFormat == 2) {
+                $CoverageTableOffset = $subtable_offset + $this->read_ushort();
+                $InputClassDefOffset = $subtable_offset + $this->read_ushort();
+                $PosClassSetCnt = $this->read_ushort();
+                $PosClassSetOffset = [];
+                for ($b = 0; $b < $PosClassSetCnt; $b++) {
+					$offset = $this->read_ushort();
+					if ($offset == 0x0000) {
+						$PosClassSetOffset[] = $offset;
+					} else {
+						$PosClassSetOffset[] = $subtable_offset + $offset;
+					}
+				}
+                $InputClasses = $this->_getClasses($InputClassDefOffset);
+                for ($s = 0; $s < $PosClassSetCnt; $s++) { // $ChainPosClassSet is ordered by input class-may be NULL
+					// Select $PosClassSet if currGlyph is in First Input Class
+					if ($PosClassSetOffset[$s] > 0 && isset($InputClasses[$s][$currGID])) {
+						$this->seek($PosClassSetOffset[$s]);
+						$PosClassRuleCnt = $this->read_ushort();
+						$PosClassRule = [];
+						for ($b = 0; $b < $PosClassRuleCnt; $b++) {
+							$PosClassRule[$b] = $PosClassSetOffset[$s] + $this->read_ushort();
+						}
+
+						for ($b = 0; $b < $PosClassRuleCnt; $b++) {  // EACH RULE
+							$this->seek($PosClassRule[$b]);
+							$InputGlyphCount = $this->read_ushort();
+							$PosCount = $this->read_ushort();
+
+							$Input = [];
+							for ($r = 1; $r < $InputGlyphCount; $r++) {
+								$Input[$r] = $this->read_ushort();
+							}
+							$inputClass = $s;
+
+							$inputGlyphs = [];
+							$inputGlyphs[0] = $InputClasses[$inputClass];
+
+							if ($InputGlyphCount > 1) {
+								//  NB starts at 1
+								for ($gcl = 1; $gcl < $InputGlyphCount; $gcl++) {
+									$classindex = $Input[$gcl];
+									if (isset($InputClasses[$classindex])) {
+										$inputGlyphs[$gcl] = $InputClasses[$classindex];
+									} else {
+										$inputGlyphs[$gcl] = '';
+									}
+								}
+							}
+
+							// Class 0 contains all the glyphs NOT in the other classes
+							$class0excl = [];
+							for ($gc = 1; $gc <= count($InputClasses); $gc++) {
+								if (is_array($InputClasses[$gc])) {
+									$class0excl = $class0excl + $InputClasses[$gc];
+								}
+							}
+
+							$backtrackGlyphs = [];
+							$lookaheadGlyphs = [];
+
+							$matched = $this->checkContextMatchMultipleUni($inputGlyphs, $backtrackGlyphs, $lookaheadGlyphs, $ignore, $ptr, $class0excl);
+							if ($matched) {
+								for ($p = 0; $p < $PosCount; $p++) { // EACH LOOKUP
+									$SequenceIndex[$p] = $this->read_ushort();
+									$LookupListIndex[$p] = $this->read_ushort();
+								}
+
+								for ($p = 0; $p < $PosCount; $p++) {
+									// Apply  $LookupListIndex  at   $SequenceIndex
+									if ($SequenceIndex[$p] >= $InputGlyphCount) {
+										continue;
+									}
+									$lu = $LookupListIndex[$p];
+									$luType = $this->GPOSLookups[$lu]['Type'];
+									$luFlag = $this->GPOSLookups[$lu]['Flag'];
+									$luMarkFilteringSet = $this->GPOSLookups[$lu]['MarkFilteringSet'];
+
+									$luptr = $matched[$SequenceIndex[$p]];
+									$lucurrGlyph = $this->OTLdata[$luptr]['hex'];
+									$lucurrGID = $this->OTLdata[$luptr]['uni'];
+
+									foreach ($this->GPOSLookups[$lu]['Subtables'] as $luc => $lusubtable_offset) {
+										$shift = $this->_applyGPOSsubtable($lu, $luc, $luptr, $lucurrGlyph, $lucurrGID, ($lusubtable_offset - $this->GPOS_offset + $this->GSUB_length), $luType, $luFlag, $luMarkFilteringSet, $this->LuCoverage[$lu][$luc], $tag, 1, $is_old_spec);
+										if ($this->debugOTL && $shift) {
+											$this->_dumpproc('GPOS', $lookupID, $subtable, $Type, $PosFormat, $ptr, $currGlyph, $level);
+										}
+										if ($shift) {
+											break;
+										}
+									}
+								}
+
+								if (!defined("OMIT_OTL_FIX_3") || OMIT_OTL_FIX_3 != 1) {
+									return $shift;
+								}
+                                return $InputGlyphCount;
+                                // should be + matched ignores in Input Sequence
+
+							}
+						}
+					}
+				}
+                return 0;
+            }
+            //===========
+            // Format 3:
+            //===========
+            if ($PosFormat == 3) {
+                throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " Format " . $PosFormat . " not TESTED YET.");
+            }
+            throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . ", Format " . $PosFormat . " not supported.");
+		}
+        else {
 			throw new \Mpdf\MpdfException("GPOS Lookup Type " . $Type . " not supported.");
 		}
 	}
@@ -4166,7 +4131,7 @@ class Otl
 	//////////////////////////////////////////////////////////////////////////////////
 	// GPOS / GSUB / GCOM (common) functions
 	//////////////////////////////////////////////////////////////////////////////////
-	private function checkContextMatch($Input, $Backtrack, $Lookahead, $ignore, $ptr)
+	private function checkContextMatch(array $Input, array $Backtrack, array $Lookahead, $ignore, $ptr)
 	{
 		// Input etc are single numbers - GSUB Format 6.1
 		// Input starts with (1=>xxx)
@@ -4181,12 +4146,14 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || $this->OTLdata[$checkpos]['uni'] != $Backtrack[$i]) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || $this->OTLdata[$checkpos]['uni'] != $Backtrack[$i]) {
+                return false;
+            }
 		}
 
 		// INPUT
@@ -4197,12 +4164,15 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} elseif (isset($this->OTLdata[$checkpos]) && $this->OTLdata[$checkpos]['uni'] == $Input[$i]) {
-				$matched[] = $checkpos;
-			} else {
+			if (isset($this->OTLdata[$checkpos]) && $this->OTLdata[$checkpos]['uni'] == $Input[$i]) {
+                $matched[] = $checkpos;
+            }
+            else {
 				return false;
 			}
 		}
@@ -4213,18 +4183,20 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || $this->OTLdata[$checkpos]['uni'] != $Lookahead[$i]) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || $this->OTLdata[$checkpos]['uni'] != $Lookahead[$i]) {
+                return false;
+            }
 		}
 
 		return $matched;
 	}
 
-	private function checkContextMatchMultiple($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = '', $bclass0excl = '', $lclass0excl = '')
+	private function checkContextMatchMultiple(array $Input, array $Backtrack, array $Lookahead, $ignore, $ptr, $class0excl = '', $bclass0excl = '', $lclass0excl = '')
 	{
 		// Input etc are string/array of glyph strings  - GSUB Format 5.2, 5.3, 6.2, 6.3, GPOS Format 7.2, 7.3, 8.2, 8.3
 		// Input starts with (1=>xxx)
@@ -4241,15 +4213,18 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
+            // If Class 0 specified, matches anything NOT in $bclass0excl
+            if (!$Backtrack[$i] && isset($this->OTLdata[$checkpos]) && strpos($bclass0excl, $this->OTLdata[$checkpos]['hex']) !== false) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Class 0 specified, matches anything NOT in $bclass0excl
-			elseif (!$Backtrack[$i] && isset($this->OTLdata[$checkpos]) && strpos($bclass0excl, $this->OTLdata[$checkpos]['hex']) !== false) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || strpos($Backtrack[$i], $this->OTLdata[$checkpos]['hex']) === false) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || strpos($Backtrack[$i], $this->OTLdata[$checkpos]['hex']) === false) {
+                return false;
+            }
 		}
 
 		// INPUT
@@ -4260,15 +4235,17 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Input Class 0 specified, matches anything NOT in $class0excl
-			elseif (!$Input[$i] && isset($this->OTLdata[$checkpos]) && strpos($class0excl, $this->OTLdata[$checkpos]['hex']) === false) {
+			if (!$Input[$i] && isset($this->OTLdata[$checkpos]) && strpos($class0excl, $this->OTLdata[$checkpos]['hex']) === false) {
 				$matched[] = $checkpos;
 			} elseif (isset($this->OTLdata[$checkpos]) && strpos($Input[$i], $this->OTLdata[$checkpos]['hex']) !== false) {
 				$matched[] = $checkpos;
-			} else {
+			}
+            else {
 				return false;
 			}
 		}
@@ -4279,20 +4256,23 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
+            // If Class 0 specified, matches anything NOT in $lclass0excl
+            if (!$Lookahead[$i] && isset($this->OTLdata[$checkpos]) && strpos($lclass0excl, $this->OTLdata[$checkpos]['hex']) !== false) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Class 0 specified, matches anything NOT in $lclass0excl
-			elseif (!$Lookahead[$i] && isset($this->OTLdata[$checkpos]) && strpos($lclass0excl, $this->OTLdata[$checkpos]['hex']) !== false) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || strpos($Lookahead[$i], $this->OTLdata[$checkpos]['hex']) === false) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || strpos($Lookahead[$i], $this->OTLdata[$checkpos]['hex']) === false) {
+                return false;
+            }
 		}
 		return $matched;
 	}
 
-	private function checkContextMatchMultipleUni($Input, $Backtrack, $Lookahead, $ignore, $ptr, $class0excl = [], $bclass0excl = [], $lclass0excl = [])
+	private function checkContextMatchMultipleUni(array $Input, array $Backtrack, array $Lookahead, $ignore, $ptr, array $class0excl = [], array $bclass0excl = [], array $lclass0excl = [])
 	{
 		// Input etc are array of glyphs - GSUB Format 5.2, 5.3, 6.2, 6.3, GPOS Format 7.2, 7.3, 8.2, 8.3
 		// Input starts with (1=>xxx)
@@ -4309,15 +4289,18 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos--;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
+            // If Class 0 specified, matches anything NOT in $bclass0excl
+            if (!$Backtrack[$i] && isset($this->OTLdata[$checkpos]) && isset($bclass0excl[$this->OTLdata[$checkpos]['uni']])) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Class 0 specified, matches anything NOT in $bclass0excl
-			elseif (!$Backtrack[$i] && isset($this->OTLdata[$checkpos]) && isset($bclass0excl[$this->OTLdata[$checkpos]['uni']])) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || !isset($Backtrack[$i][$this->OTLdata[$checkpos]['uni']])) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || !isset($Backtrack[$i][$this->OTLdata[$checkpos]['uni']])) {
+                return false;
+            }
 		}
 
 		// INPUT
@@ -4328,15 +4311,17 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Input Class 0 specified, matches anything NOT in $class0excl
-			elseif (!$Input[$i] && isset($this->OTLdata[$checkpos]) && !isset($class0excl[$this->OTLdata[$checkpos]['uni']])) {
+			if (!$Input[$i] && isset($this->OTLdata[$checkpos]) && !isset($class0excl[$this->OTLdata[$checkpos]['uni']])) {
 				$matched[] = $checkpos;
 			} elseif (isset($this->OTLdata[$checkpos]) && isset($Input[$i][$this->OTLdata[$checkpos]['uni']])) {
 				$matched[] = $checkpos;
-			} else {
+			}
+            else {
 				return false;
 			}
 		}
@@ -4347,15 +4332,18 @@ class Otl
 			while (isset($this->OTLdata[$checkpos]) && strpos($ignore, $this->OTLdata[$checkpos]['hex']) !== false) {
 				$checkpos++;
 			}
+            // If outside scope of current syllable - return no match
+            if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
+                return false;
+            }
+            // If Class 0 specified, matches anything NOT in $lclass0excl
+            if (!$Lookahead[$i] && isset($this->OTLdata[$checkpos]) && isset($lclass0excl[$this->OTLdata[$checkpos]['uni']])) {
+                return false;
+            }
 			// If outside scope of current syllable - return no match
-			if ($this->restrictToSyllable && isset($this->OTLdata[$checkpos]['syllable']) && $this->OTLdata[$checkpos]['syllable'] != $current_syllable) {
-				return false;
-			} // If Class 0 specified, matches anything NOT in $lclass0excl
-			elseif (!$Lookahead[$i] && isset($this->OTLdata[$checkpos]) && isset($lclass0excl[$this->OTLdata[$checkpos]['uni']])) {
-				return false;
-			} elseif (!isset($this->OTLdata[$checkpos]) || !isset($Lookahead[$i][$this->OTLdata[$checkpos]['uni']])) {
-				return false;
-			}
+			if (!isset($this->OTLdata[$checkpos]) || !isset($Lookahead[$i][$this->OTLdata[$checkpos]['uni']])) {
+                return false;
+            }
 		}
 		return $matched;
 	}
@@ -4450,7 +4438,7 @@ class Otl
 		if ($offset) {
 			$this->seek($offset);
 		}
-		$AnchorFormat = $this->read_ushort();
+		$this->read_ushort();
 		$XCoordinate = $this->read_short();
 		$YCoordinate = $this->read_short();
 		// Format 2 specifies additional link to contour point; Format 3 additional Device table
@@ -4460,16 +4448,15 @@ class Otl
 	private function _getMarkRecord($offset, $MarkPos)
 	{
 		$this->seek($offset);
-		$MarkCount = $this->read_ushort();
+		$this->read_ushort();
 		$this->skip($MarkPos * 4);
 		$Class = $this->read_ushort();
 		$MarkAnchor = $offset + $this->read_ushort();  // = Offset to anchor table
 		list($x, $y) = $this->_getAnchorTable($MarkAnchor);
-		$MarkRecord = ['Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y];
-		return $MarkRecord;
+		return ['Class' => $Class, 'AnchorX' => $x, 'AnchorY' => $y];
 	}
 
-	private function _getGCOMignoreString($flag, $MarkFilteringSet)
+	private function _getGCOMignoreString($flag)
 	{
 		// If ignoreFlag set, combine all ignore glyphs into -> "(?:( 0FBA1| 0FBA2| 0FBA3)*)"
 		// else "()"
@@ -4489,11 +4476,6 @@ class Otl
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if ($flag & 0x0010) {
 			throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - Not tested yet");
-			// Change also in ttfontsuni.php
-			if ($MarkFilteringSet == '') {
-				throw new \Mpdf\MpdfException("This font [" . $this->fontkey . "] contains MarkGlyphSets - but MarkFilteringSet not set");
-			}
-			$str = $this->MarkGlyphSets[$MarkFilteringSet];
 		}
 
 		// If Ignore Marks set, supercedes any above
@@ -4521,9 +4503,8 @@ class Otl
 		}
 		if ($str) {
 			return "((?:(?:" . $str . "))*)";
-		} else {
-			return "()";
 		}
+        return "()";
 	}
 
 	private function _checkGCOMignore($flag, $glyph, $MarkFilteringSet)
@@ -4549,7 +4530,7 @@ class Otl
 		}
 		// Flag & 0x0010 = UseMarkFilteringSet
 		if (($flag & 0x0010) && strpos($this->MarkGlyphSets[$MarkFilteringSet], $glyph)) {
-			$ignore = true;
+			return true;
 		}
 		return $ignore;
 	}
@@ -4586,7 +4567,7 @@ class Otl
 	 * WS    Whitespace          Space, figure space, line separator, form feed, General Punctuation spaces, ...
 	 * ON    Other Neutrals      All other characters, including OBJECT REPLACEMENT CHARACTER
 	 */
-	public function bidiSort($ta, $str, $dir, &$chunkOTLdata, $useGPOS)
+	public function bidiSort($ta, $str, $dir, array &$chunkOTLdata, $useGPOS)
 	{
 
 		$pel = 0; // paragraph embedding level
@@ -4700,8 +4681,7 @@ class Otl
 		// If the higher level is odd, the sor or eor is R; otherwise, it is L.
 
 		$prelevel = $pel;
-		$postlevel = $pel;
-		$cel = $prelevel; // current embedding level
+		$postlevel = $pel; // current embedding level
 		for ($i = 0; $i < $numchars; ++$i) {
 			$level = $chardata[$i]['level'];
 			if ($i == 0) {
@@ -5103,9 +5083,7 @@ class Otl
 							}
 							if ($para[$nc2][18]['char_data'][$i2]['uni'] == 8297) {
 								$lvl--;
-								if ($lvl < 0) {
-									break;
-								}
+								break;
 							}
 							if ($para[$nc2][18]['char_data'][$i2]['bidi_class'] === Ucdn::BIDI_CLASS_L || $para[$nc2][18]['char_data'][$i2]['bidi_class'] == Ucdn::BIDI_CLASS_AL || $para[$nc2][18]['char_data'][$i2]['bidi_class'] === Ucdn::BIDI_CLASS_R) {
 								$fsi = $para[$nc2][18]['char_data'][$i2]['bidi_class'];
@@ -5228,9 +5206,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					$right = $postlevel;
 					$nc2 = $nc;
 					$i2 = $i;
@@ -5271,9 +5253,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					if ($chardata[$i]['type'] == Ucdn::BIDI_CLASS_NSM) {
 						if (isset($chardata[$i]['sor'])) {
 							$chardata[$i]['type'] = $chardata[$i]['sor'];
@@ -5293,9 +5279,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
@@ -5330,9 +5320,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					// Get next type
 					$nexttype = -1;
 					$nc2 = $nc;
@@ -5372,9 +5366,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					if (isset($chardata[$i]['sor'])) {
 						$prevtype = $chardata[$i]['sor'];
 					}
@@ -5392,9 +5390,12 @@ class Otl
 									$nc2++;
 									$i2 = 0;
 								}
-								if (!isset($para[$nc2][18]['char_data'][$i2]['diid']) || $para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
-									continue;
-								}
+                                if (!isset($para[$nc2][18]['char_data'][$i2]['diid'])) {
+                                    continue;
+                                }
+                                if ($para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
+                                    continue;
+                                }
 								$nexttype = $para[$nc2][18]['char_data'][$i2]['type'];
 								if (isset($para[$nc2][18]['char_data'][$i2]['sor'])) {
 									break;
@@ -5431,9 +5432,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
@@ -5454,9 +5459,13 @@ class Otl
 				$chardata = & $para[$nc][18]['char_data'];
 				$numchars = count($chardata);
 				for ($i = 0; $i < $numchars; ++$i) {
-					if (!isset($chardata[$i]['diid']) || $chardata[$i]['diid'] != $ir) {
-						continue;
-					} // Ignore characters in a different isolate run
+					if (!isset($chardata[$i]['diid'])) {
+                        continue;
+                    }
+                    if ($chardata[$i]['diid'] != $ir) {
+                        continue;
+                    }
+                    // Ignore characters in a different isolate run
 					if (isset($chardata[$i]['sor'])) {
 						$laststrongtype = $chardata[$i]['sor'];
 					}
@@ -5484,9 +5493,12 @@ class Otl
 									$nc2++;
 									$i2 = 0;
 								}
-								if (!isset($para[$nc2][18]['char_data'][$i2]['diid']) || $para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
-									continue;
-								}
+                                if (!isset($para[$nc2][18]['char_data'][$i2]['diid'])) {
+                                    continue;
+                                }
+                                if ($para[$nc2][18]['char_data'][$i2]['diid'] != $ir) {
+                                    continue;
+                                }
 								$nexttype = $para[$nc2][18]['char_data'][$i2]['type'];
 								if ($nexttype == Ucdn::BIDI_CLASS_R || $nexttype == Ucdn::BIDI_CLASS_EN || $nexttype == Ucdn::BIDI_CLASS_AN) {
 									$right = Ucdn::BIDI_CLASS_R;
@@ -5569,7 +5581,7 @@ class Otl
 	/**
 	 * Reorder, once divided into lines
 	 */
-	public function bidiReorder(&$chunkorder, &$content, &$cOTLdata, $blockdir)
+	public function bidiReorder(array &$chunkorder, array &$content, array &$cOTLdata, $blockdir)
 	{
 		$bidiData = [];
 
@@ -5706,7 +5718,7 @@ class Otl
 		}
 	}
 
-	public function splitOTLdata(&$cOTLdata, $OTLcutoffpos, $OTLrestartpos = '')
+	public function splitOTLdata(array &$cOTLdata, $OTLcutoffpos, $OTLrestartpos = '')
 	{
 		if (!$OTLrestartpos) {
 			$OTLrestartpos = $OTLcutoffpos;
@@ -5742,7 +5754,7 @@ class Otl
 		return $newOTLdata;
 	}
 
-	public function sliceOTLdata($OTLdata, $pos, $len)
+	public function sliceOTLdata(array $OTLdata, $pos, $len)
 	{
 		$newOTLdata = ['GPOSinfo' => [], 'char_data' => []];
 		$newOTLdata['group'] = substr($OTLdata['group'], $pos, $len);
@@ -5770,7 +5782,7 @@ class Otl
 	/**
 	 * Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
 	 */
-	public function removeChar(&$txt, &$cOTLdata, $char)
+	public function removeChar(&$txt, array &$cOTLdata, $char)
 	{
 		while (mb_strpos($txt, $char, 0, $this->mpdf->mb_enc) !== false) {
 			$pos = mb_strpos($txt, $char, 0, $this->mpdf->mb_enc);
@@ -5797,7 +5809,7 @@ class Otl
 	/**
 	 * Remove one or more occurrences of $char (single character) from $txt and adjust OTLdata
 	 */
-	public function replaceSpace(&$txt, &$cOTLdata)
+	public function replaceSpace(&$txt, array &$cOTLdata)
 	{
 		$char = chr(194) . chr(160); // NBSP
 		while (mb_strpos($txt, $char, 0, $this->mpdf->mb_enc) !== false) {
@@ -6022,7 +6034,7 @@ class Otl
 		return $GlyphByClass;
 	}
 
-	private function _getOTLscriptTag($ScriptLang, $scripttag, $scriptblock, $shaper, $useOTL, $mode)
+	private function _getOTLscriptTag(array $ScriptLang, $scripttag, $scriptblock, $shaper, $useOTL)
 	{
 		// ScriptLang is the array of available script/lang tags supported by the font
 		// $scriptblock is the (number/code) for the script of the actual text string based on Unicode properties (Ucdn::$uni_scriptblock)
@@ -6162,7 +6174,6 @@ class Otl
 
 		$lang = '';
 		$country = '';
-		$script = '';
 
 		$lang = isset($tags[0])
 			? strtolower($tags[0])
@@ -6189,9 +6200,8 @@ class Otl
 		if (strpos($available, $langsys) === false) {
 			if (strpos($available, "DFLT") !== false) {
 				return "DFLT";
-			} else {
-				return '';
 			}
+            return '';
 		}
 
 		return $langsys;

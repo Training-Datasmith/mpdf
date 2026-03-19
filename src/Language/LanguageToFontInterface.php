@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mpdf\Language;
 
 /**
@@ -23,7 +25,6 @@ namespace Mpdf\Language;
  */
 interface LanguageToFontInterface
 {
-
-	public function getLanguageOptions($llcc, $adobeCJK);
+    public function getLanguageOptions($llcc, $adobeCJK);
 
 }

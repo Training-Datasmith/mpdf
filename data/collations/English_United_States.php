@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 return [
   710 => 94,
   189 => 188,

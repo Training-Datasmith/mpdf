@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mpdf\Log;
 
 class Context
 {
+    public const STATISTICS = 'statistics';
 
-	const STATISTICS = 'statistics';
+    public const PDFA_PDFX = 'pdfa_pdfx';
 
-	const PDFA_PDFX = 'pdfa_pdfx';
+    public const UTF8 = 'utf8';
 
-	const UTF8 = 'utf8';
+    public const REMOTE_CONTENT = 'remote_content';
 
-	const REMOTE_CONTENT = 'remote_content';
+    public const IMAGES = 'images';
 
-	const IMAGES = 'images';
+    public const CSS_SIZE_CONVERSION = 'css_size_conversion';
 
-	const CSS_SIZE_CONVERSION = 'css_size_conversion';
-
-	const HTML_MARKUP = 'html_markup';
+    public const HTML_MARKUP = 'html_markup';
 
 }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 return [
   173 => 8205,
   1600 => 8205,
