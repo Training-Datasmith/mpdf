@@ -60,6 +60,15 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface, \Mpdf\AssetFetcherI
 
         if ($originalSrc && $this->mpdf->basepathIsLocal && $check = @fopen($originalSrc, 'rb')) {
             fclose($check);
+
+            // Block file:// URLs to prevent arbitrary local file disclosure via user-controlled HTML.
+            // file:// is recognised as a local path by isPathLocal() but must not be fetched when
+            // the source URL explicitly uses the file:// scheme (e.g. <img src="file:///etc/passwd">).
+            if (stripos($originalSrc, 'file://') === 0) {
+                $this->logger->warning(sprintf('Blocked file:// URL "%s" in local content fetch', $originalSrc), ['context' => LogContext::REMOTE_CONTENT]);
+                return $data;
+            }
+
             $path = $originalSrc;
             $this->logger->debug(sprintf('Fetching content of file "%s" with local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
 
@@ -68,6 +77,13 @@ class AssetFetcher implements \Psr\Log\LoggerAwareInterface, \Mpdf\AssetFetcherI
 
         if ($path && $check = @fopen($path, 'rb')) {
             fclose($check);
+
+            // Same guard for the resolved $path.
+            if (stripos($path, 'file://') === 0) {
+                $this->logger->warning(sprintf('Blocked file:// URL "%s" in local content fetch', $path), ['context' => LogContext::REMOTE_CONTENT]);
+                return $data;
+            }
+
             $this->logger->debug(sprintf('Fetching content of file "%s" with non-local basepath', $path), ['context' => LogContext::REMOTE_CONTENT]);
 
             return $this->contentLoader->load($path);

@@ -171,6 +171,13 @@ class MetadataWriter implements \Psr\Log\LoggerAwareInterface
 		}
 
 		foreach ($this->mpdf->customProperties as $key => $value) {
+			// Sanitize key to valid PDF Name characters only (alphanumeric, underscore, hyphen, dot).
+			// Keys containing whitespace, newlines, or PDF delimiters would corrupt the PDF structure
+			// or allow injection of arbitrary PDF operators.
+			$key = preg_replace('/[^0-9A-Za-z_.\-]/', '', (string) $key);
+			if ($key === '') {
+				continue;
+			}
 			$this->writer->write('/' . $key . ' ' . $this->writer->utf16BigEndianTextString($value));
 		}
 
