@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Gif;
 
 /**
@@ -17,55 +16,45 @@ namespace Mpdf\Gif;
 class Gif
 {
     public $m_gfh;
-
-    public $m_lpData;
-
+    public $m_lp_data;
     public $m_img;
-
-    public $m_bLoaded;
-
+    public $m_b_loaded;
     public function __construct()
     {
-        $this->m_gfh = new FileHeader();
+        $this->m_gfh = new File_Header();
         $this->m_img = new Image();
-        $this->m_lpData = '';
-        $this->m_bLoaded = false;
+        $this->m_lp_data = '';
+        $this->m_b_loaded = false;
     }
-
-    public function ClearData()
+    public function clear_data()
     {
-        $this->m_lpData = '';
+        $this->m_lp_data = '';
         unset($this->m_img->m_data);
         unset($this->m_img->m_lzw->Next);
         unset($this->m_img->m_lzw->Vals);
         unset($this->m_img->m_lzw->Stack);
         unset($this->m_img->m_lzw->Buf);
     }
-
-    public function loadFile(&$data, $iIndex)
+    public function load_file(&$data, $i_index)
     {
-        if ($iIndex < 0) {
+        if ($i_index < 0) {
             return false;
         }
-        $this->m_lpData = $data;
-
+        $this->m_lp_data = $data;
         // GET FILE HEADER
         $len = 0;
-        if (!$this->m_gfh->load($this->m_lpData, $len)) {
+        if (!$this->m_gfh->load($this->m_lp_data, $len)) {
             return false;
         }
-
-        $this->m_lpData = substr($this->m_lpData, $len);
-
+        $this->m_lp_data = substr($this->m_lp_data, $len);
         do {
-            $imgLen = 0;
-            if (!$this->m_img->load($this->m_lpData, $imgLen)) {
+            $img_len = 0;
+            if (!$this->m_img->load($this->m_lp_data, $img_len)) {
                 return false;
             }
-            $this->m_lpData = substr($this->m_lpData, $imgLen);
-        } while ($iIndex-- > 0);
-
-        $this->m_bLoaded = true;
+            $this->m_lp_data = substr($this->m_lp_data, $img_len);
+        } while ($i_index-- > 0);
+        $this->m_b_loaded = true;
         return true;
     }
 }

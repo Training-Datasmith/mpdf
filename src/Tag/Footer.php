@@ -2,8 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class Footer extends BlockTag
+class Footer extends Block_Tag
 {
-
-
 }

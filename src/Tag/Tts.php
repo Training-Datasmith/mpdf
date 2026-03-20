@@ -2,14 +2,12 @@
 
 namespace Mpdf\Tag;
 
-class Tts extends SubstituteTag
+class Tts extends Substitute_Tag
 {
-
-	public function open($attr, &$ahtml, &$ihtml)
-	{
-		$this->mpdf->tts = true;
-		$this->mpdf->InlineProperties['TTS'] = $this->mpdf->saveInlineProperties();
-		$this->mpdf->setCSS(['FONT-FAMILY' => 'csymbol', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
-	}
-
+    public function open($attr, &$ahtml, &$ihtml)
+    {
+        $this->mpdf->tts = true;
+        $this->mpdf->inline_properties['TTS'] = $this->mpdf->save_inline_properties();
+        $this->mpdf->set_css(['FONT-FAMILY' => 'csymbol', 'FONT-WEIGHT' => 'normal', 'FONT-STYLE' => 'normal'], 'INLINE');
+    }
 }

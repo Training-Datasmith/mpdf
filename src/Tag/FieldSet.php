@@ -2,8 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class FieldSet extends BlockTag
+class Field_Set extends Block_Tag
 {
-
-
 }

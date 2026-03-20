@@ -2,7 +2,6 @@
 
 namespace Mpdf;
 
-class MpdfImageException extends \Mpdf\MpdfException
+class Mpdf_Image_Exception extends \Mpdf\Mpdf_Exception
 {
-
 }

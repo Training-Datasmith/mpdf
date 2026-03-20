@@ -2,8 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class B extends InlineTag
+class B extends Inline_Tag
 {
-
-
 }

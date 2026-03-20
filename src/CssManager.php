@@ -1,26 +1,22 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf;
 
-use Mpdf\Css\CssMerger;
-use Mpdf\Css\CssParser;
+use Mpdf\Css\Css_Merger;
+use Mpdf\Css\Css_Parser;
 use Mpdf\Exception\InvalidArgumentException;
 use Mpdf\Utils\Arrays;
-
-class CssManager
+class Css_Manager
 {
     /**
      * @var \Mpdf\Css\CssParser
      */
-    private $cssParser;
-
+    private $css_parser;
     /**
      * @var \Mpdf\Css\CssMerger
      */
-    private $cssMerger;
-
+    private $css_merger;
     /**
      * Main CSS property storage array.
      *
@@ -40,7 +36,6 @@ class CssManager
      * @var array
      */
     public $CSS = [];
-
     /**
      * CSS cascade storage for table elements.
      *
@@ -60,8 +55,7 @@ class CssManager
      *
      * @var array
      */
-    public $tablecascadeCSS = [];
-
+    public $tablecascade_css = [];
     /**
      * Cascading CSS property storage.
      *
@@ -81,26 +75,23 @@ class CssManager
      *
      * @var array
      */
-    public $cascadeCSS = [];
-
+    public $cascade_css = [];
     /**
      * @var int Table CSS cascade level counter
      */
-    public $tbCSSlvl = 0;
-
+    public $tb_cs_slvl = 0;
     /**
      * CssManager constructor.
      *
      * Initializes the CSS manager with required dependencies and sets up
      * internal storage structures for CSS properties and cascading.
      */
-    public function __construct(CssParser $cssParser, CssMerger $cssMerger)
+    public function __construct(Css_Parser $css_parser, Css_Merger $css_merger)
     {
-        $this->cssParser = $cssParser;
-        $this->cssMerger = $cssMerger;
-        $this->cssMerger->setCssManager($this);
+        $this->css_parser = $css_parser;
+        $this->css_merger = $css_merger;
+        $this->css_merger->set_css_manager($this);
     }
-
     /**
      * Read and parse CSS from HTML content.
      *
@@ -111,31 +102,26 @@ class CssManager
      * @param string $html HTML content containing CSS
      * @return string HTML with CSS content removed
      */
-    public function readCss($html)
+    public function read_css($html)
     {
-        if (!is_array($this->cascadeCSS)) {
-            $this->cascadeCSS = [];
+        if (!is_array($this->cascade_css)) {
+            $this->cascade_css = [];
         }
-
-        $html = $this->cssParser->parse($html);
-
-        $this->CSS = Arrays::uniqueRecursiveMerge($this->CSS, $this->cssParser->getCss());
-        $this->cascadeCSS = Arrays::uniqueRecursiveMerge($this->cascadeCSS, $this->cssParser->getCascadeCss());
-
+        $html = $this->css_parser->parse($html);
+        $this->CSS = Arrays::unique_recursive_merge($this->CSS, $this->css_parser->get_css());
+        $this->cascade_css = Arrays::unique_recursive_merge($this->cascade_css, $this->css_parser->get_cascade_css());
         return $html;
     }
-
     /**
      * Parse inline CSS style attribute.
      *
      * @param string $html CSS string from style attribute
      * @return array Parsed CSS properties
      */
-    public function readInlineCss($html)
+    public function read_inline_css($html)
     {
-        return $this->cssParser->parseInlineCss($html);
+        return $this->css_parser->parse_inline_css($html);
     }
-
     /**
      * Merge CSS properties for an HTML element.
      *
@@ -149,11 +135,10 @@ class CssManager
      * @param array $attr HTML attributes including CLASS, ID, STYLE
      * @return array Merged CSS properties array
      */
-    public function mergeCss($inherit, $tag, $attr)
+    public function merge_css($inherit, $tag, $attr)
     {
-        return $this->cssMerger->merge($inherit, $tag, $attr);
+        return $this->css_merger->merge($inherit, $tag, $attr);
     }
-
     /**
      * Preview block-level CSS without creating the block.
      *
@@ -164,21 +149,18 @@ class CssManager
      * @param array $attr HTML attributes array
      * @return array CSS properties that would be applied
      */
-    public function previewBlockCss($tag, $attr)
+    public function preview_block_css($tag, $attr)
     {
-        return $this->cssMerger->previewBlockCss($tag, $attr);
+        return $this->css_merger->preview_block_css($tag, $attr);
     }
-
-    public function getUsedClassNames()
+    public function get_used_class_names()
     {
-        return $this->cssParser->getUsedClassNames();
+        return $this->css_parser->get_used_class_names();
     }
-
-    public function getMaxClassDepth()
+    public function get_max_class_depth()
     {
-        return $this->cssParser->getMaxClassDepth();
+        return $this->css_parser->get_max_class_depth();
     }
-
     /**
      * Parse box-shadow CSS property.
      *
@@ -188,11 +170,10 @@ class CssManager
      * @param string $value Box-shadow property value
      * @return array Array of shadow definitions
      */
-    public function setCssBoxShadow($value)
+    public function set_css_box_shadow($value)
     {
-        return $this->cssParser->parseBoxShadow($value);
+        return $this->css_parser->parse_box_shadow($value);
     }
-
     /**
      * Parse text-shadow CSS property.
      *
@@ -202,11 +183,10 @@ class CssManager
      * @param string $value Text-shadow property value
      * @return array Array of text shadow definitions
      */
-    public function setCssTextShadow($value)
+    public function set_css_text_shadow($value)
     {
-        return $this->cssParser->parseTextShadow($value);
+        return $this->css_parser->parse_text_shadow($value);
     }
-
     /**
      * Set border dominance level for a specific side.
      *
@@ -215,19 +195,18 @@ class CssManager
      * @throws InvalidArgumentException
      * @return void
      */
-    public function setBorderDominance($side, $val)
+    public function set_border_dominance($side, $val)
     {
-        $this->cssMerger->setBorderDominance($side, $val);
+        $this->css_merger->set_border_dominance($side, $val);
     }
-
     /**
      * Get border dominance level for a specific side.
      *
      * @param string $side T|R|B|L
      * @return int Dominance value
      */
-    public function getBorderDominance($side)
+    public function get_border_dominance($side)
     {
-        return $this->cssMerger->getBorderDominance($side);
+        return $this->css_merger->get_border_dominance($side);
     }
 }

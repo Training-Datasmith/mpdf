@@ -1,23 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Conversion;
 
-use Mpdf\Utils\UtfString;
-
-class DecToCjk
+use Mpdf\Utils\Utf_String;
+class Dec_To_Cjk
 {
     public function convert($num)
     {
         $nstr = (string) $num;
         $rnum = '';
-        $glyphs = [0x3007, 0x4E00, 0x4E8C, 0x4E09, 0x56DB, 0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D];
+        $glyphs = [0x3007, 0x4e00, 0x4e8c, 0x4e09, 0x56db, 0x4e94, 0x516d, 0x4e03, 0x516b, 0x4e5d];
         $len = strlen($nstr);
         for ($i = 0; $i < $len; $i++) {
-            $rnum .= UtfString::code2utf($glyphs[(int) $nstr[$i]]);
+            $rnum .= Utf_String::code2utf($glyphs[(int) $nstr[$i]]);
         }
         return $rnum;
     }
-
 }

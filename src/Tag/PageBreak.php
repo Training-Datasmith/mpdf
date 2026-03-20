@@ -2,7 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class PageBreak extends FormFeed
+class Page_Break extends Form_Feed
 {
-
 }

@@ -1,40 +1,34 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Css;
 
-use Mpdf\AssetFetcher;
+use Mpdf\Asset_Fetcher;
 use Mpdf\Cache;
-use Mpdf\Exception\AssetFetchingException;
+use Mpdf\Exception\Asset_Fetching_Exception;
 use Mpdf\Mpdf;
-use Mpdf\MpdfException;
+use Mpdf\Mpdf_Exception;
 use Mpdf\Utils\Path;
-
-class CssLoader
+class Css_Loader
 {
     /**
      * @var Mpdf
      */
     private $mpdf;
-
     /**
      * @var AssetFetcher
      */
-    private $assetFetcher;
-
+    private $asset_fetcher;
     /**
      * @var Cache
      */
     private $cache;
-
-    public function __construct(Mpdf $mpdf, AssetFetcher $assetFetcher, Cache $cache)
+    public function __construct(Mpdf $mpdf, Asset_Fetcher $asset_fetcher, Cache $cache)
     {
         $this->mpdf = $mpdf;
-        $this->assetFetcher = $assetFetcher;
+        $this->asset_fetcher = $asset_fetcher;
         $this->cache = $cache;
     }
-
     /**
      * Fetch and return the CSS from $path
      *
@@ -42,26 +36,24 @@ class CssLoader
      * @return string
      * @throws MpdfException If asset fetching issue, is through when $mpdf->debug = true
      */
-    public function loadStylesheet($path)
+    public function load_stylesheet($path)
     {
         $path = preg_replace('/\.css\?.*$/', '.css', $path);
-
         try {
-            $data = $this->assetFetcher->fetchDataFromPath($path);
+            $data = $this->asset_fetcher->fetch_data_from_path($path);
             if (!$data) {
-                $path = !$this->mpdf->basepathIsLocal ? Path::normalizeLocalFilePath($path) : $path;
-                $data = $this->assetFetcher->fetchDataFromPath($path);
+                $path = !$this->mpdf->basepath_is_local ? Path::normalize_local_file_path($path) : $path;
+                $data = $this->asset_fetcher->fetch_data_from_path($path);
             }
-        } catch (AssetFetchingException $e) {
-            $data = ''; // do nothing
+        } catch (Asset_Fetching_Exception $e) {
+            $data = '';
+            // do nothing
             if ($this->mpdf->debug) {
-                throw new MpdfException($e->getMessage(), 0, E_ERROR, null, null, $e);
+                throw new Mpdf_Exception($e->get_message(), 0, E_ERROR, null, null, $e);
             }
         }
-
         return $data;
     }
-
     /**
      * Extract external stylesheet URLs from HTML.
      *
@@ -74,33 +66,27 @@ class CssLoader
      * @param string $html HTML content to scan
      * @return array Array of CSS file URLs
      */
-    public function extractExternalStylesheetUrls($html)
+    public function extract_external_stylesheet_urls($html)
     {
-        $cssUrls = [];
-
+        $css_urls = [];
         // <link rel="stylesheet" href="...">
         if (preg_match_all('/<link[^>]*rel=["\']stylesheet["\'][^>]*href=["\']([^>"\']*)["\'].*?>/si', $html, $cxt)) {
-            $cssUrls = $cxt[1];
+            $css_urls = $cxt[1];
         }
-
         // <link href="..." rel="stylesheet">
         if (preg_match_all('/<link[^>]*href=["\']([^>"\']*)["\'][^>]*?rel=["\']stylesheet["\'].*?>/si', $html, $cxt)) {
-            $cssUrls = array_merge($cssUrls, $cxt[1]);
+            $css_urls = array_merge($css_urls, $cxt[1]);
         }
-
         // @import url(...)
         if (preg_match_all('/@import url\([\'\"]{0,1}(\S*?\.css(\?[^\s\'\"]+)?)[\'\"]{0,1}\)\;?/si', $html, $cxt)) {
-            $cssUrls = array_merge($cssUrls, $cxt[1]);
+            $css_urls = array_merge($css_urls, $cxt[1]);
         }
-
         // @import "..."
         if (preg_match_all('/@import (?!url)[\'\"]{0,1}(\S*?\.css(\?[^\s\'\"]+)?)[\'\"]{0,1}\;?/si', $html, $cxt)) {
-            return array_merge($cssUrls, $cxt[1]);
+            return array_merge($css_urls, $cxt[1]);
         }
-
-        return $cssUrls;
+        return $css_urls;
     }
-
     /**
      * Locate embedded @import stylesheets in other stylesheets and fix url paths
      * (including background-images) relative to stylesheet
@@ -111,22 +97,19 @@ class CssLoader
      * @param int $externalCssCount
      * @return string
      */
-    public function processExternalCssImports($stylesheetCss, $path, &$externalCss, &$externalCssCount)
+    public function process_external_css_imports($stylesheet_css, $path, &$external_css, &$external_css_count)
     {
         $css = '';
-
-        $cssBasePath = preg_replace('/\/[^\/]*$/', '', $path) . '/';
-        if (preg_match_all('/@import url\([\'\"]{0,1}(.*?\.css(\?\S+)?)[\'\"]{0,1}\)/si', $stylesheetCss, $cxtem)) {
+        $css_base_path = preg_replace('/\/[^\/]*$/', '', $path) . '/';
+        if (preg_match_all('/@import url\([\'\"]{0,1}(.*?\.css(\?\S+)?)[\'\"]{0,1}\)/si', $stylesheet_css, $cxtem)) {
             foreach ($cxtem[1] as $cxtembedded) {
                 // path is relative to original stylesheet!!
-                $externalCss[] = Path::relativeToAbsolutePath($cxtembedded, $cssBasePath);
-                $externalCssCount++;
+                $external_css[] = Path::relative_to_absolute_path($cxtembedded, $css_base_path);
+                $external_css_count++;
             }
         }
-
-        return $css . (' ' . $this->resolveBackgroundUrls($stylesheetCss, $cssBasePath));
+        return $css . (' ' . $this->resolve_background_urls($stylesheet_css, $css_base_path));
     }
-
     /**
      * Resolve background image URLs in CSS.
      *
@@ -137,25 +120,21 @@ class CssLoader
      * @param string|null $basePath Optional base path for resolving relative URLs
      * @return string CSS string with resolved URLs
      */
-    public function resolveBackgroundUrls($cssStr, $basePath = null)
+    public function resolve_background_urls($css_str, $base_path = null)
     {
-        if (!preg_match_all('/(background[^;]*url\s*\(\s*[\'"]{0,1})([^)\'"]*)([\'"]{0,1}\s*\))/si', $cssStr, $cxtem)) {
-            return $cssStr;
+        if (!preg_match_all('/(background[^;]*url\s*\(\s*[\'"]{0,1})([^)\'"]*)([\'"]{0,1}\s*\))/si', $css_str, $cxtem)) {
+            return $css_str;
         }
-
-        $basePath = $basePath ?: $this->mpdf->basepath;
-
+        $base_path = $base_path ?: $this->mpdf->basepath;
         foreach ($cxtem[0] as $i => $value) {
             $embedded = $cxtem[2][$i];
             if (!preg_match('/^data:image/i', $embedded)) {
-                $newPath = Path::relativeToAbsolutePath($embedded, $basePath);
-                $cssStr = str_replace($cxtem[0][$i], ($cxtem[1][$i] . $newPath . $cxtem[3][$i]), $cssStr);
+                $new_path = Path::relative_to_absolute_path($embedded, $base_path);
+                $css_str = str_replace($cxtem[0][$i], $cxtem[1][$i] . $new_path . $cxtem[3][$i], $css_str);
             }
         }
-
-        return $cssStr;
+        return $css_str;
     }
-
     /**
      * Process data URI images in CSS.
      *
@@ -166,18 +145,16 @@ class CssLoader
      * @return string CSS string with data URIs replaced by temp file references
      * @throws \Random\RandomException
      */
-    public function processDataUriImages($cssStr)
+    public function process_data_uri_images($css_str)
     {
-        preg_match_all("/(url\(data:image\/(jpeg|gif|png);base64,(.*?)\))/si", $cssStr, $idata);
+        preg_match_all("/(url\\(data:image\\/(jpeg|gif|png);base64,(.*?)\\))/si", $css_str, $idata);
         if (count($idata[0]) === 0) {
-            return $cssStr;
+            return $css_str;
         }
-
         foreach ($idata[0] as $i => $value) {
             $file = $this->cache->write('_tempCSSidata' . random_int(1, 10000) . '_' . $i . '.' . $idata[2][$i], base64_decode($idata[3][$i]));
-            $cssStr = str_replace($idata[0][$i], 'url("' . $file . '")', $cssStr);
+            $css_str = str_replace($idata[0][$i], 'url("' . $file . '")', $css_str);
         }
-
-        return $cssStr;
+        return $css_str;
     }
 }

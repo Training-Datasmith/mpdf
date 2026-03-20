@@ -2,8 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class Time extends InlineTag
+class Time extends Inline_Tag
 {
-
-
 }

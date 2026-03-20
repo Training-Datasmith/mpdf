@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Http\Exception;
 
-class ForbiddenRequestException extends \Mpdf\MpdfException
+class Forbidden_Request_Exception extends \Mpdf\Mpdf_Exception
 {
 }

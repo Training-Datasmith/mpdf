@@ -1,28 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Fonts;
 
-class FontFileFinder
+class Font_File_Finder
 {
     private $directories;
-
     public function __construct($directories)
     {
-        $this->setDirectories($directories);
+        $this->set_directories($directories);
     }
-
-    public function setDirectories($directories)
+    public function set_directories($directories)
     {
         if (!is_array($directories)) {
             $directories = [$directories];
         }
-
         $this->directories = $directories;
     }
-
-    public function findFontFile(string $name)
+    public function find_font_file(string $name)
     {
         foreach ($this->directories as $directory) {
             $filename = $directory . '/' . $name;
@@ -30,7 +25,6 @@ class FontFileFinder
                 return $filename;
             }
         }
-
-        throw new \Mpdf\MpdfException(sprintf('Cannot find TTF TrueType font file "%s" in configured font directories.', $name));
+        throw new \Mpdf\Mpdf_Exception(sprintf('Cannot find TTF TrueType font file "%s" in configured font directories.', $name));
     }
 }

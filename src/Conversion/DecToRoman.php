@@ -1,135 +1,105 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Conversion;
 
 /**
  * @link https://github.com/JeroenDeDauw/RomanNumbers
  * @license GNU GPL v2+
  */
-class DecToRoman
+class Dec_To_Roman
 {
-    private $symbolMap;
-
-    public function __construct(array $symbolMap = [])
+    private $symbol_map;
+    public function __construct(array $symbol_map = [])
     {
-        if ($symbolMap !== []) {
-            $this->symbolMap = $symbolMap;
+        if ($symbol_map !== []) {
+            $this->symbol_map = $symbol_map;
         } else {
-            $this->symbolMap = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
+            $this->symbol_map = [['I', 'V'], ['X', 'L'], ['C', 'D'], ['M']];
         }
     }
-
-    public function convert($number, $toUpper = true)
+    public function convert($number, $to_upper = true)
     {
-        $this->ensureNumberIsAnInteger($number);
-        $this->ensureNumberIsWithinBounds($number);
-
-        return $this->constructRomanString($number, $toUpper);
+        $this->ensure_number_is_an_integer($number);
+        $this->ensure_number_is_within_bounds($number);
+        return $this->construct_roman_string($number, $to_upper);
     }
-
-    private function ensureNumberIsAnInteger($number)
+    private function ensure_number_is_an_integer($number)
     {
         if (!is_int($number)) {
             throw new \InvalidArgumentException('Can only translate integers to roman');
         }
     }
-
-    private function ensureNumberIsWithinBounds($number)
+    private function ensure_number_is_within_bounds($number)
     {
         if ($number < 1) {
             throw new \OutOfRangeException('Numbers under one cannot be translated to roman');
         }
-
-        if ($number > $this->getUpperBound()) {
+        if ($number > $this->get_upper_bound()) {
             throw new \OutOfBoundsException('The provided number is to big to be fully translated to roman');
         }
     }
-
-    public function getUpperBound()
+    public function get_upper_bound()
     {
-        $symbolGroupCount = count($this->symbolMap);
-        $valueOfOne = 10 ** ($symbolGroupCount - 1);
-
-        $hasFiveSymbol = array_key_exists(1, $this->symbolMap[$symbolGroupCount - 1]);
-
-        return $valueOfOne * ($hasFiveSymbol ? 9 : 4) - 1;
+        $symbol_group_count = count($this->symbol_map);
+        $value_of_one = 10 ** ($symbol_group_count - 1);
+        $has_five_symbol = array_key_exists(1, $this->symbol_map[$symbol_group_count - 1]);
+        return $value_of_one * ($has_five_symbol ? 9 : 4) - 1;
     }
-
-    private function constructRomanString($number, $toUpper)
+    private function construct_roman_string($number, $to_upper)
     {
-        $romanNumber = '';
-
-        $symbolMapCount = count($this->symbolMap);
-        for ($i = 0; $i < $symbolMapCount; $i++) {
+        $roman_number = '';
+        $symbol_map_count = count($this->symbol_map);
+        for ($i = 0; $i < $symbol_map_count; $i++) {
             $divisor = 10 ** ($i + 1);
             $remainder = $number % $divisor;
-            $digit = $remainder / (10 ** $i);
-
+            $digit = $remainder / 10 ** $i;
             $number -= $remainder;
-            $romanNumber = $this->formatDigit($digit, $i) . $romanNumber;
-
+            $roman_number = $this->format_digit($digit, $i) . $roman_number;
             if ($number === 0) {
                 break;
             }
         }
-
-        if (!$toUpper) {
-            return strtolower($romanNumber);
+        if (!$to_upper) {
+            return strtolower($roman_number);
         }
-
-        return $romanNumber;
+        return $roman_number;
     }
-
-    private function formatDigit($digit, $orderOfMagnitude)
+    private function format_digit($digit, $order_of_magnitude)
     {
         if ($digit === 0) {
             return '';
         }
-
         if ($digit === 4 || $digit === 9) {
-            return $this->formatFourOrNine($digit, $orderOfMagnitude);
+            return $this->format_four_or_nine($digit, $order_of_magnitude);
         }
-
-        $romanNumber = '';
-
+        $roman_number = '';
         if ($digit >= 5) {
             $digit -= 5;
-            $romanNumber .= $this->getFiveSymbol($orderOfMagnitude);
+            $roman_number .= $this->get_five_symbol($order_of_magnitude);
         }
-
-        return $romanNumber . $this->formatOneToThree($orderOfMagnitude, $digit);
+        return $roman_number . $this->format_one_to_three($order_of_magnitude, $digit);
     }
-
-    private function formatFourOrNine($digit, $orderOfMagnitude)
+    private function format_four_or_nine($digit, $order_of_magnitude)
     {
-        $firstSymbol = $this->getOneSymbol($orderOfMagnitude);
-        $secondSymbol = $digit === 4
-            ? $this->getFiveSymbol($orderOfMagnitude)
-            : $this->getTenSymbol($orderOfMagnitude);
-
-        return $firstSymbol . $secondSymbol;
+        $first_symbol = $this->get_one_symbol($order_of_magnitude);
+        $second_symbol = $digit === 4 ? $this->get_five_symbol($order_of_magnitude) : $this->get_ten_symbol($order_of_magnitude);
+        return $first_symbol . $second_symbol;
     }
-
-    private function formatOneToThree($orderOfMagnitude, $digit)
+    private function format_one_to_three($order_of_magnitude, $digit)
     {
-        return str_repeat($this->getOneSymbol($orderOfMagnitude), $digit);
+        return str_repeat($this->get_one_symbol($order_of_magnitude), $digit);
     }
-
-    private function getOneSymbol($orderOfMagnitude)
+    private function get_one_symbol($order_of_magnitude)
     {
-        return $this->symbolMap[$orderOfMagnitude][0];
+        return $this->symbol_map[$order_of_magnitude][0];
     }
-
-    private function getFiveSymbol($orderOfMagnitude)
+    private function get_five_symbol($order_of_magnitude)
     {
-        return $this->symbolMap[$orderOfMagnitude][1];
+        return $this->symbol_map[$order_of_magnitude][1];
     }
-
-    private function getTenSymbol($orderOfMagnitude)
+    private function get_ten_symbol($order_of_magnitude)
     {
-        return $this->symbolMap[$orderOfMagnitude + 1][0];
+        return $this->symbol_map[$order_of_magnitude + 1][0];
     }
-
 }

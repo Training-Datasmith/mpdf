@@ -1,37 +1,31 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Css;
 
-use Mpdf\Color\ColorConverter;
+use Mpdf\Color\Color_Converter;
 use Mpdf\Mpdf;
-use Mpdf\SizeConverter;
-
-class ShadowParser
+use Mpdf\Size_Converter;
+class Shadow_Parser
 {
     /**
      * @var Mpdf
      */
     private $mpdf;
-
     /**
      * @var SizeConverter
      */
-    private $sizeConverter;
-
+    private $size_converter;
     /**
      * @var ColorConverter
      */
-    private $colorConverter;
-
-    public function __construct(Mpdf $mpdf, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+    private $color_converter;
+    public function __construct(Mpdf $mpdf, Size_Converter $size_converter, Color_Converter $color_converter)
     {
         $this->mpdf = $mpdf;
-        $this->sizeConverter = $sizeConverter;
-        $this->colorConverter = $colorConverter;
+        $this->size_converter = $size_converter;
+        $this->color_converter = $color_converter;
     }
-
     /**
      * Normalize shadow colors.
      *
@@ -41,17 +35,16 @@ class ShadowParser
      * @param string $value Shadow property value
      * @return string Normalized shadow property value
      */
-    public function normalizeShadowColors($value)
+    public function normalize_shadow_colors($value)
     {
-        $c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $value, $x); // mPDF 5.6.05
+        $c = preg_match_all('/(rgba|rgb|device-cmyka|cmyka|device-cmyk|cmyk|hsla|hsl)\(.*?\)/', $value, $x);
+        // mPDF 5.6.05
         for ($i = 0; $i < $c; $i++) {
             $col = preg_replace('/,\s/', '*', $x[0][$i]);
             $value = str_replace($x[0][$i], $col, $value);
         }
-
         return $value;
     }
-
     /**
      * Parse box-shadow CSS property.
      *
@@ -61,20 +54,18 @@ class ShadowParser
      * @param string $value Box-shadow property value
      * @return array Array of shadow definitions
      */
-    public function parseBoxShadow($value)
+    public function parse_box_shadow($value)
     {
         $sh = [];
-        $ss = explode(',', $this->normalizeShadowColors($value));
+        $ss = explode(',', $this->normalize_shadow_colors($value));
         foreach ($ss as $s) {
-            $boxShadow = $this->parseSingleBoxShadow($s);
-            if ($boxShadow) {
-                array_unshift($sh, $boxShadow);
+            $box_shadow = $this->parse_single_box_shadow($s);
+            if ($box_shadow) {
+                array_unshift($sh, $box_shadow);
             }
         }
-
         return $sh;
     }
-
     /**
      * Parse a single box-shadow definition.
      *
@@ -84,113 +75,66 @@ class ShadowParser
      * @param string $s Shadow definition string
      * @return array|null Parsed shadow array or null if invalid
      */
-    protected function parseSingleBoxShadow($s)
+    protected function parse_single_box_shadow($s)
     {
-        $boxShadow = [
-            'inset' => false,
-            'blur' => 0,
-            'spread' => 0,
-        ];
-
+        $box_shadow = ['inset' => false, 'blur' => 0, 'spread' => 0];
         if (stripos($s, 'inset') !== false) {
-            $boxShadow['inset'] = true;
+            $box_shadow['inset'] = true;
             $s = preg_replace('/\s*inset\s*/', '', $s);
         }
-
         $p = explode(' ', trim($s));
         if (isset($p[0])) {
-            $parentWidth = 0;
+            $parent_width = 0;
             if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'])) {
-                $parentWidth = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
+                $parent_width = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
             } elseif (isset($this->mpdf->blk[0]['inner_width'])) {
-                $parentWidth = $this->mpdf->blk[0]['inner_width'];
+                $parent_width = $this->mpdf->blk[0]['inner_width'];
             }
-
-            $boxShadow['x'] = $this->sizeConverter->convert(
-                trim($p[0]),
-                $parentWidth,
-                $this->mpdf->FontSize,
-                false
-            );
+            $box_shadow['x'] = $this->size_converter->convert(trim($p[0]), $parent_width, $this->mpdf->font_size, false);
         }
-
         if (isset($p[1])) {
-            $parentWidth = 0;
+            $parent_width = 0;
             if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'])) {
-                $parentWidth = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
+                $parent_width = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
             } elseif (isset($this->mpdf->blk[0]['inner_width'])) {
-                $parentWidth = $this->mpdf->blk[0]['inner_width'];
+                $parent_width = $this->mpdf->blk[0]['inner_width'];
             }
-
-            $boxShadow['y'] = $this->sizeConverter->convert(
-                trim($p[1]),
-                $parentWidth,
-                $this->mpdf->FontSize,
-                false
-            );
-
+            $box_shadow['y'] = $this->size_converter->convert(trim($p[1]), $parent_width, $this->mpdf->font_size, false);
         }
-
         if (isset($p[2])) {
             if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-                $parentWidth = 0;
+                $parent_width = 0;
                 if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'])) {
-                    $parentWidth = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
+                    $parent_width = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
                 } elseif (isset($this->mpdf->blk[0]['inner_width'])) {
-                    $parentWidth = $this->mpdf->blk[0]['inner_width'];
+                    $parent_width = $this->mpdf->blk[0]['inner_width'];
                 }
-
-                $boxShadow['blur'] = $this->sizeConverter->convert(
-                    trim($p[2]),
-                    $parentWidth,
-                    $this->mpdf->FontSize,
-                    false
-                );
+                $box_shadow['blur'] = $this->size_converter->convert(trim($p[2]), $parent_width, $this->mpdf->font_size, false);
             } else {
-                $boxShadow['col'] = $this->colorConverter->convert(
-                    preg_replace('/\*/', ',', $p[2]),
-                    $this->mpdf->PDFAXwarnings
-                );
+                $box_shadow['col'] = $this->color_converter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->pdfa_xwarnings);
             }
         }
-
         if (isset($p[3])) {
             if (preg_match('/^\s*[\.\-0-9]/', $p[3])) {
-                $parentWidth = 0;
+                $parent_width = 0;
                 if (isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width'])) {
-                    $parentWidth = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
+                    $parent_width = isset($this->mpdf->blk[$this->mpdf->blklvl - 1]['inner_width']);
                 } elseif (isset($this->mpdf->blk[0]['inner_width'])) {
-                    $parentWidth = $this->mpdf->blk[0]['inner_width'];
+                    $parent_width = $this->mpdf->blk[0]['inner_width'];
                 }
-
-                $boxShadow['spread'] = $this->sizeConverter->convert(
-                    trim($p[3]),
-                    $parentWidth,
-                    $this->mpdf->FontSize,
-                    false
-                );
+                $box_shadow['spread'] = $this->size_converter->convert(trim($p[3]), $parent_width, $this->mpdf->font_size, false);
             } else {
-                $boxShadow['col'] = $this->colorConverter->convert(
-                    preg_replace('/\*/', ',', $p[3]),
-                    $this->mpdf->PDFAXwarnings
-                );
+                $box_shadow['col'] = $this->color_converter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->pdfa_xwarnings);
             }
         }
-
         if (isset($p[4])) {
-            $boxShadow['col'] = $this->colorConverter->convert(
-                preg_replace('/\*/', ',', $p[4]),
-                $this->mpdf->PDFAXwarnings
-            );
+            $box_shadow['col'] = $this->color_converter->convert(preg_replace('/\*/', ',', $p[4]), $this->mpdf->pdfa_xwarnings);
         }
-
-        if (empty($boxShadow['col'])) {
-            $boxShadow['col'] = $this->colorConverter->convert('#888888', $this->mpdf->PDFAXwarnings);
+        if (empty($box_shadow['col'])) {
+            $box_shadow['col'] = $this->color_converter->convert('#888888', $this->mpdf->pdfa_xwarnings);
         }
-
-        return isset($boxShadow['y']) ? $boxShadow : null;
+        return isset($box_shadow['y']) ? $box_shadow : null;
     }
-
     /**
      * Parse text-shadow CSS property.
      *
@@ -200,21 +144,18 @@ class ShadowParser
      * @param string $value Text-shadow property value
      * @return array Array of text shadow definitions
      */
-    public function parseTextShadow($value)
+    public function parse_text_shadow($value)
     {
         $sh = [];
-        $ss = explode(',', $this->normalizeShadowColors($value));
-
+        $ss = explode(',', $this->normalize_shadow_colors($value));
         foreach ($ss as $s) {
-            $textShadow = $this->parseSingleTextShadow($s);
-            if ($textShadow) {
-                array_unshift($sh, $textShadow);
+            $text_shadow = $this->parse_single_text_shadow($s);
+            if ($text_shadow) {
+                array_unshift($sh, $text_shadow);
             }
         }
-
         return $sh;
     }
-
     /**
      * Parse a single text-shadow definition.
      *
@@ -224,59 +165,29 @@ class ShadowParser
      * @param string $s Shadow definition string
      * @return array|null Parsed shadow array or null if invalid
      */
-    protected function parseSingleTextShadow($s)
+    protected function parse_single_text_shadow($s)
     {
-        $textShadow = ['blur' => 0];
+        $text_shadow = ['blur' => 0];
         $p = explode(' ', trim($s));
-
         if (isset($p[0])) {
-            $textShadow['x'] = $this->sizeConverter->convert(
-                trim($p[0]),
-                $this->mpdf->FontSize,
-                $this->mpdf->FontSize,
-                false
-            );
+            $text_shadow['x'] = $this->size_converter->convert(trim($p[0]), $this->mpdf->font_size, $this->mpdf->font_size, false);
         }
-
         if (isset($p[1])) {
-            $textShadow['y'] = $this->sizeConverter->convert(
-                trim($p[1]),
-                $this->mpdf->FontSize,
-                $this->mpdf->FontSize,
-                false
-            );
+            $text_shadow['y'] = $this->size_converter->convert(trim($p[1]), $this->mpdf->font_size, $this->mpdf->font_size, false);
         }
-
         if (isset($p[2])) {
             if (preg_match('/^\s*[\.\-0-9]/', $p[2])) {
-                $textShadow['blur'] = $this->sizeConverter->convert(
-                    trim($p[2]),
-                    isset($this->mpdf->blk[$this->mpdf->blklvl]['inner_width']) ? $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'] : 0,
-                    $this->mpdf->FontSize,
-                    false
-                );
+                $text_shadow['blur'] = $this->size_converter->convert(trim($p[2]), isset($this->mpdf->blk[$this->mpdf->blklvl]['inner_width']) ? $this->mpdf->blk[$this->mpdf->blklvl]['inner_width'] : 0, $this->mpdf->font_size, false);
             } else {
-                $textShadow['col'] = $this->colorConverter->convert(
-                    preg_replace('/\*/', ',', $p[2]),
-                    $this->mpdf->PDFAXwarnings
-                );
+                $text_shadow['col'] = $this->color_converter->convert(preg_replace('/\*/', ',', $p[2]), $this->mpdf->pdfa_xwarnings);
             }
         }
-
         if (isset($p[3])) {
-            $textShadow['col'] = $this->colorConverter->convert(
-                preg_replace('/\*/', ',', $p[3]),
-                $this->mpdf->PDFAXwarnings
-            );
+            $text_shadow['col'] = $this->color_converter->convert(preg_replace('/\*/', ',', $p[3]), $this->mpdf->pdfa_xwarnings);
         }
-
-        if (empty($textShadow['col'])) {
-            $textShadow['col'] = $this->colorConverter->convert(
-                '#888888',
-                $this->mpdf->PDFAXwarnings
-            );
+        if (empty($text_shadow['col'])) {
+            $text_shadow['col'] = $this->color_converter->convert('#888888', $this->mpdf->pdfa_xwarnings);
         }
-
-        return isset($textShadow['y']) ? $textShadow : null;
+        return isset($text_shadow['y']) ? $text_shadow : null;
     }
 }

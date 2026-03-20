@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Gif;
 
 /**
@@ -14,73 +13,57 @@ namespace Mpdf\Gif;
  *
  * @link http://www.yamasoft.com
  */
-class ImageHeader
+class Image_Header
 {
-    public $m_nLeft;
-
-    public $m_nTop;
-
-    public $m_nWidth;
-
-    public $m_nHeight;
-
-    public $m_bLocalClr;
-
-    public $m_bInterlace;
-
-    public $m_bSorted;
-
-    public $m_nTableSize;
-
+    public $m_n_left;
+    public $m_n_top;
+    public $m_n_width;
+    public $m_n_height;
+    public $m_b_local_clr;
+    public $m_b_interlace;
+    public $m_b_sorted;
+    public $m_n_table_size;
     /**
      * @var \Mpdf\Gif\ColorTable
      */
-    public $m_colorTable;
-
+    public $m_color_table;
     public function __construct()
     {
-        unset($this->m_nLeft);
-        unset($this->m_nTop);
-        unset($this->m_nWidth);
-        unset($this->m_nHeight);
-        unset($this->m_bLocalClr);
-        unset($this->m_bInterlace);
-        unset($this->m_bSorted);
-        unset($this->m_nTableSize);
-        unset($this->m_colorTable);
+        unset($this->m_n_left);
+        unset($this->m_n_top);
+        unset($this->m_n_width);
+        unset($this->m_n_height);
+        unset($this->m_b_local_clr);
+        unset($this->m_b_interlace);
+        unset($this->m_b_sorted);
+        unset($this->m_n_table_size);
+        unset($this->m_color_table);
     }
-
-    public function load($lpData, &$hdrLen)
+    public function load($lp_data, &$hdr_len)
     {
-        $hdrLen = 0;
-
-        $this->m_nLeft = $this->w2i(substr($lpData, 0, 2));
-        $this->m_nTop = $this->w2i(substr($lpData, 2, 2));
-        $this->m_nWidth = $this->w2i(substr($lpData, 4, 2));
-        $this->m_nHeight = $this->w2i(substr($lpData, 6, 2));
-
-        if (!$this->m_nWidth || !$this->m_nHeight) {
+        $hdr_len = 0;
+        $this->m_n_left = $this->w2i(substr($lp_data, 0, 2));
+        $this->m_n_top = $this->w2i(substr($lp_data, 2, 2));
+        $this->m_n_width = $this->w2i(substr($lp_data, 4, 2));
+        $this->m_n_height = $this->w2i(substr($lp_data, 6, 2));
+        if (!$this->m_n_width || !$this->m_n_height) {
             return false;
         }
-
-        $b = ord($lpData[8]);
-        $this->m_bLocalClr = ($b & 0x80) ? true : false;
-        $this->m_bInterlace = ($b & 0x40) ? true : false;
-        $this->m_bSorted = ($b & 0x20) ? true : false;
-        $this->m_nTableSize = 2 << ($b & 0x07);
-        $hdrLen = 9;
-
-        if ($this->m_bLocalClr) {
-            $this->m_colorTable = new ColorTable();
-            if (!$this->m_colorTable->load(substr($lpData, $hdrLen), $this->m_nTableSize)) {
+        $b = ord($lp_data[8]);
+        $this->m_b_local_clr = $b & 0x80 ? true : false;
+        $this->m_b_interlace = $b & 0x40 ? true : false;
+        $this->m_b_sorted = $b & 0x20 ? true : false;
+        $this->m_n_table_size = 2 << ($b & 0x7);
+        $hdr_len = 9;
+        if ($this->m_b_local_clr) {
+            $this->m_color_table = new Color_Table();
+            if (!$this->m_color_table->load(substr($lp_data, $hdr_len), $this->m_n_table_size)) {
                 return false;
             }
-            $hdrLen += 3 * $this->m_nTableSize;
+            $hdr_len += 3 * $this->m_n_table_size;
         }
-
         return true;
     }
-
     public function w2i($str)
     {
         return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);

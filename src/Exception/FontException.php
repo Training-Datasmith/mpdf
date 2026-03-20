@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Exception;
 
-class FontException extends \Mpdf\MpdfException
+class Font_Exception extends \Mpdf\Mpdf_Exception
 {
 }

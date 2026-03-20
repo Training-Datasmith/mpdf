@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Gif;
 
 /**
@@ -14,80 +13,63 @@ namespace Mpdf\Gif;
  *
  * @link http://www.yamasoft.com
  */
-class FileHeader
+class File_Header
 {
-    public $m_lpVer;
-
-    public $m_nWidth;
-
-    public $m_nHeight;
-
-    public $m_bGlobalClr;
-
-    public $m_nColorRes;
-
-    public $m_bSorted;
-
-    public $m_nTableSize;
-
-    public $m_nBgColor;
-
-    public $m_nPixelRatio;
-
+    public $m_lp_ver;
+    public $m_n_width;
+    public $m_n_height;
+    public $m_b_global_clr;
+    public $m_n_color_res;
+    public $m_b_sorted;
+    public $m_n_table_size;
+    public $m_n_bg_color;
+    public $m_n_pixel_ratio;
     /**
      * @var \Mpdf\Gif\ColorTable
      */
-    public $m_colorTable;
-
+    public $m_color_table;
     public function __construct()
     {
-        unset($this->m_lpVer);
-        unset($this->m_nWidth);
-        unset($this->m_nHeight);
-        unset($this->m_bGlobalClr);
-        unset($this->m_nColorRes);
-        unset($this->m_bSorted);
-        unset($this->m_nTableSize);
-        unset($this->m_nBgColor);
-        unset($this->m_nPixelRatio);
-        unset($this->m_colorTable);
+        unset($this->m_lp_ver);
+        unset($this->m_n_width);
+        unset($this->m_n_height);
+        unset($this->m_b_global_clr);
+        unset($this->m_n_color_res);
+        unset($this->m_b_sorted);
+        unset($this->m_n_table_size);
+        unset($this->m_n_bg_color);
+        unset($this->m_n_pixel_ratio);
+        unset($this->m_color_table);
     }
-
-    public function load($lpData, &$hdrLen)
+    public function load($lp_data, &$hdr_len)
     {
-        $hdrLen = 0;
-
-        $this->m_lpVer = substr($lpData, 0, 6);
-        if (($this->m_lpVer <> 'GIF87a') && ($this->m_lpVer <> 'GIF89a')) {
+        $hdr_len = 0;
+        $this->m_lp_ver = substr($lp_data, 0, 6);
+        if ($this->m_lp_ver != 'GIF87a' && $this->m_lp_ver != 'GIF89a') {
             return false;
         }
-
-        $this->m_nWidth = $this->w2i(substr($lpData, 6, 2));
-        $this->m_nHeight = $this->w2i(substr($lpData, 8, 2));
-        if (!$this->m_nWidth || !$this->m_nHeight) {
+        $this->m_n_width = $this->w2i(substr($lp_data, 6, 2));
+        $this->m_n_height = $this->w2i(substr($lp_data, 8, 2));
+        if (!$this->m_n_width || !$this->m_n_height) {
             return false;
         }
-
-        $b = ord(substr($lpData, 10, 1));
-        $this->m_bGlobalClr = ($b & 0x80) ? true : false;
-        $this->m_nColorRes = ($b & 0x70) >> 4;
-        $this->m_bSorted = ($b & 0x08) ? true : false;
-        $this->m_nTableSize = 2 << ($b & 0x07);
-        $this->m_nBgColor = ord(substr($lpData, 11, 1));
-        $this->m_nPixelRatio = ord(substr($lpData, 12, 1));
-        $hdrLen = 13;
-
-        if ($this->m_bGlobalClr) {
-            $this->m_colorTable = new ColorTable();
-            if (!$this->m_colorTable->load(substr($lpData, $hdrLen), $this->m_nTableSize)) {
+        $b = ord(substr($lp_data, 10, 1));
+        $this->m_b_global_clr = $b & 0x80 ? true : false;
+        $this->m_n_color_res = ($b & 0x70) >> 4;
+        $this->m_b_sorted = $b & 0x8 ? true : false;
+        $this->m_n_table_size = 2 << ($b & 0x7);
+        $this->m_n_bg_color = ord(substr($lp_data, 11, 1));
+        $this->m_n_pixel_ratio = ord(substr($lp_data, 12, 1));
+        $hdr_len = 13;
+        if ($this->m_b_global_clr) {
+            $this->m_color_table = new Color_Table();
+            if (!$this->m_color_table->load(substr($lp_data, $hdr_len), $this->m_n_table_size)) {
                 return false;
             }
-            $hdrLen += 3 * $this->m_nTableSize;
+            $hdr_len += 3 * $this->m_n_table_size;
         }
-
         return true;
     }
-
     public function w2i($str)
     {
         return ord(substr($str, 0, 1)) + (ord(substr($str, 1, 1)) << 8);

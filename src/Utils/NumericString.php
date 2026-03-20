@@ -2,17 +2,14 @@
 
 namespace Mpdf\Utils;
 
-class NumericString
+class Numeric_String
 {
-
-	public static function containsPercentChar($string)
-	{
-		return strstr($string, '%');
-	}
-
-	public static function removePercentChar($string)
-	{
-		return str_replace('%', '', $string);
-	}
-
+    public static function contains_percent_char($string)
+    {
+        return strstr($string, '%');
+    }
+    public static function remove_percent_char($string)
+    {
+        return str_replace('%', '', $string);
+    }
 }

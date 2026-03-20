@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Http\Exception;
 
-class NetworkException extends \Mpdf\MpdfException
+class Network_Exception extends \Mpdf\Mpdf_Exception
 {
 }

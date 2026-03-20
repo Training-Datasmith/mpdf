@@ -2,8 +2,6 @@
 
 namespace Mpdf\Tag;
 
-class Article extends BlockTag
+class Article extends Block_Tag
 {
-
-
 }

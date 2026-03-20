@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Language;
 
 /**
@@ -23,8 +22,7 @@ namespace Mpdf\Language;
  * und (for undetermined or undefined) is used in situations in which a script must be indicated but the language cannot be identified.
  * e.g. und-Cyrl is an undefined language written in Cyrillic script.
  */
-interface LanguageToFontInterface
+interface Language_To_Font_Interface
 {
-    public function getLanguageOptions($llcc, $adobeCJK);
-
+    public function get_language_options($llcc, $adobe_cjk);
 }

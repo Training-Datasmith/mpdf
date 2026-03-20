@@ -1,21 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Css;
 
-class InlineStyleParser
+class Inline_Style_Parser
 {
     /**
      * @var NormalizeProperties
      */
-    private $normalizeProperties;
-
-    public function __construct(NormalizeProperties $normalizeProperties)
+    private $normalize_properties;
+    public function __construct(Normalize_Properties $normalize_properties)
     {
-        $this->normalizeProperties = $normalizeProperties;
+        $this->normalize_properties = $normalize_properties;
     }
-
     /**
      * Parse inline CSS style attribute.
      *
@@ -27,42 +24,37 @@ class InlineStyleParser
      */
     public function parse($html)
     {
-        $html = htmlspecialchars_decode($html); // mPDF 5.7.4 URLs
+        $html = htmlspecialchars_decode($html);
+        // mPDF 5.7.4 URLs
         // mPDF 5.7.4 URLs
         // Characters "(", ")", and ";" in url() e.g. background-image, cause problems parsing the CSS string
         // URLencode ( and ), but change ";" to a code which can be converted back after parsing (so as not to confuse ;
         // with a segment delimiter in the URI)
-        $html = $this->processUrlsInCss($html);
-
+        $html = $this->process_urls_in_css($html);
         // Fix incomplete CSS code
         $size = strlen($html) - 1;
         if (substr($html, $size, 1) !== ';') {
             $html .= ';';
         }
-
         // Make CSS[Name-of-the-class] = array(key => value)
-        $regexp = '|\\s*?(\\S+?):(.+?);|i';
+        $regexp = '|\s*?(\S+?):(.+?);|i';
         preg_match_all($regexp, $html, $styleinfo);
         $properties = $styleinfo[1];
         $values = $styleinfo[2];
-
         // Array-properties and Array-values must have the SAME SIZE!
         $classproperties = [];
         $properties_count = count($properties);
         for ($i = 0; $i < $properties_count; $i++) {
-
             // Ignores -webkit-gradient so doesn't override -moz-
             if ((strtoupper($properties[$i]) === 'BACKGROUND-IMAGE' || strtoupper($properties[$i]) === 'BACKGROUND') && false !== stripos($values[$i], '-webkit-gradient')) {
                 continue;
             }
-
-            $values[$i] = str_replace('%ZZ', ';', $values[$i]); // mPDF 5.7.4 URLs
+            $values[$i] = str_replace('%ZZ', ';', $values[$i]);
+            // mPDF 5.7.4 URLs
             $classproperties[strtoupper($properties[$i])] = trim($values[$i]);
         }
-
-        return $this->normalizeProperties->normalize($classproperties);
+        return $this->normalize_properties->normalize($classproperties);
     }
-
     /**
      * Process URLs in CSS strings by encoding special characters.
      *
@@ -73,33 +65,29 @@ class InlineStyleParser
      * @param string $css CSS string containing url() references
      * @return string CSS string with processed URLs
      */
-    public function processUrlsInCss($css)
+    public function process_urls_in_css($css)
     {
         if (strpos($css, 'url(') === false) {
             return $css;
         }
-
         // Process urls with double quotes
         preg_match_all('/url\(\"(.*?)\"\)/', $css, $m);
         foreach ($m[1] as $i => $url) {
             $tmp = str_replace(['(', ')', ';'], ['%28', '%29', '%ZZ'], $m[1][$i]);
             $css = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $css);
         }
-
         // Process urls with single quotes
         preg_match_all('/url\(\'(.*?)\'\)/', $css, $m);
         foreach ($m[1] as $i => $url) {
             $tmp = str_replace(['(', ')', ';'], ['%28', '%29', '%ZZ'], $m[1][$i]);
             $css = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $css);
         }
-
         // Process urls without quotes
         preg_match_all('/url\(([^\'\"].*?[^\'\"])\)/', $css, $m);
         foreach ($m[1] as $i => $url) {
             $tmp = str_replace(['(', ')', ';'], ['%28', '%29', '%ZZ'], $m[1][$i]);
             $css = str_replace($m[0][$i], 'url(\'' . $tmp . '\')', $css);
         }
-
         return $css;
     }
 }

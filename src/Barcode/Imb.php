@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Barcode;
 
 /**
@@ -33,7 +32,7 @@ namespace Mpdf\Barcode;
  *     be 0, 5, 9, or 11 digits. The allowable encoding ranges shall be no ZIP Code, 00000-99999,  000000000-999999999,
  *     and 00000000000-99999999999.
  */
-class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\BarcodeInterface
+class Imb extends \Mpdf\Barcode\Abstract_Barcode implements \Mpdf\Barcode\Barcode_Interface
 {
     /**
      * @param string $code
@@ -41,148 +40,115 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
      * @param float $gapWidth
      * @param int[] $daft
      */
-    public function __construct($code, $xDim, $gapWidth, $daft)
+    public function __construct($code, $x_dim, $gap_width, $daft)
     {
         if (!function_exists('bcadd')) {
-            throw new \Mpdf\Barcode\BarcodeException('IMB barcodes require bcmath extension to be loaded.');
+            throw new \Mpdf\Barcode\Barcode_Exception('IMB barcodes require bcmath extension to be loaded.');
         }
-
-        $this->init($code, $gapWidth, $daft);
-
-        $this->data['nom-X'] = $xDim;
-        $this->data['nom-H'] = 3.68; // Nominal value for Height of Full bar in mm (spec.)
-
+        $this->init($code, $gap_width, $daft);
+        $this->data['nom-X'] = $x_dim;
+        $this->data['nom-H'] = 3.68;
+        // Nominal value for Height of Full bar in mm (spec.)
         // USPS-B-3200 Revision C = 4.623
         // USPS-B-3200 Revision E = 3.68
-        $this->data['quietL'] = 3.175; // LEFT Quiet margin =  mm (spec.)
-        $this->data['quietR'] = 3.175; // RIGHT Quiet margin =  mm (spec.)
-        $this->data['quietTB'] = 0.711; // TOP/BOTTOM Quiet margin =  mm (spec.)
+        $this->data['quietL'] = 3.175;
+        // LEFT Quiet margin =  mm (spec.)
+        $this->data['quietR'] = 3.175;
+        // RIGHT Quiet margin =  mm (spec.)
+        $this->data['quietTB'] = 0.711;
+        // TOP/BOTTOM Quiet margin =  mm (spec.)
     }
-
     /**
      * @param string $code
      * @param float $gapWidth
      * @param int[] $daft
      */
-    private function init($code, $gapWidth, array $daft)
+    private function init($code, $gap_width, array $daft)
     {
-        $asc_chr = [
-            4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4,
-            3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8,
-        ];
-
-        $dsc_chr = [
-            7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2,
-            5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3,
-        ];
-
-        $asc_pos = [
-            3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6,
-            8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2,
-        ];
-
-        $dsc_pos = [
-            2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0,
-            6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10,
-        ];
-
-        $codeArray = explode('-', $code);
-        $trackingNumber = $codeArray[0];
-
-        $routingCode = '';
-        if (isset($codeArray[1])) {
-            $routingCode = $codeArray[1];
+        $asc_chr = [4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0, 6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6, 8, 9, 2, 0, 5, 1, 9, 4, 3, 8, 6, 7, 1, 2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0, 9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8];
+        $dsc_chr = [7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9, 7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1, 7, 5, 4, 3, 8, 7, 6, 0, 2, 5, 4, 9, 3, 0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2, 6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3];
+        $asc_pos = [3, 0, 8, 11, 1, 12, 8, 11, 10, 6, 4, 12, 2, 7, 9, 6, 7, 9, 2, 8, 4, 0, 12, 7, 10, 9, 0, 7, 10, 5, 7, 9, 6, 8, 2, 12, 1, 4, 2, 0, 1, 5, 4, 6, 12, 1, 0, 9, 4, 7, 5, 10, 2, 6, 9, 11, 2, 12, 6, 7, 5, 11, 0, 3, 2];
+        $dsc_pos = [2, 10, 12, 5, 9, 1, 5, 4, 3, 9, 11, 5, 10, 1, 6, 3, 4, 1, 10, 0, 2, 11, 8, 6, 1, 12, 3, 8, 6, 4, 4, 11, 0, 6, 1, 9, 11, 5, 3, 7, 3, 10, 7, 11, 8, 2, 10, 3, 5, 8, 0, 3, 12, 11, 8, 4, 5, 1, 3, 0, 7, 12, 9, 8, 10];
+        $code_array = explode('-', $code);
+        $tracking_number = $code_array[0];
+        $routing_code = '';
+        if (isset($code_array[1])) {
+            $routing_code = $code_array[1];
         }
-
         // Conversion of Routing Code
-        switch (strlen($routingCode)) {
+        switch (strlen($routing_code)) {
             case 0:
-                $binaryCode = 0;
+                $binary_code = 0;
                 break;
             case 5:
-                $binaryCode = bcadd($routingCode, '1');
+                $binary_code = bcadd($routing_code, '1');
                 break;
             case 9:
-                $binaryCode = bcadd($routingCode, '100001');
+                $binary_code = bcadd($routing_code, '100001');
                 break;
             case 11:
-                $binaryCode = bcadd($routingCode, '1000100001');
+                $binary_code = bcadd($routing_code, '1000100001');
                 break;
             default:
-                throw new \Mpdf\Barcode\BarcodeException(sprintf('Invalid MSI routing code "%s"', $routingCode));
+                throw new \Mpdf\Barcode\Barcode_Exception(sprintf('Invalid MSI routing code "%s"', $routing_code));
         }
-
-        $binaryCode = bcmul($binaryCode, 10);
-        $binaryCode = bcadd($binaryCode, $trackingNumber[0]);
-        $binaryCode = bcmul($binaryCode, 5);
-        $binaryCode = bcadd($binaryCode, $trackingNumber[1]);
-
-        $binaryCode .= substr($trackingNumber, 2, 18);
-
+        $binary_code = bcmul($binary_code, 10);
+        $binary_code = bcadd($binary_code, $tracking_number[0]);
+        $binary_code = bcmul($binary_code, 5);
+        $binary_code = bcadd($binary_code, $tracking_number[1]);
+        $binary_code .= substr($tracking_number, 2, 18);
         // convert to hexadecimal
-        $binaryCode = $this->decToHex($binaryCode);
-
+        $binary_code = $this->dec_to_hex($binary_code);
         // pad to get 13 bytes
-        $binaryCode = str_pad($binaryCode, 26, '0', STR_PAD_LEFT);
-
+        $binary_code = str_pad($binary_code, 26, '0', STR_PAD_LEFT);
         // convert string to array of bytes
-        $binaryCodeArray = chunk_split($binaryCode, 2, "\r");
-        $binaryCodeArray = substr($binaryCodeArray, 0, -1);
-        $binaryCodeArray = explode("\r", $binaryCodeArray);
-
+        $binary_code_array = chunk_split($binary_code, 2, "\r");
+        $binary_code_array = substr($binary_code_array, 0, -1);
+        $binary_code_array = explode("\r", $binary_code_array);
         // calculate frame check sequence
-        $fcs = $this->imbCrc11Fcs($binaryCodeArray);
-
+        $fcs = $this->imb_crc11fcs($binary_code_array);
         // exclude first 2 bits from first byte
-        $first_byte = sprintf('%2s', dechex((hexdec($binaryCodeArray[0]) << 2) >> 2));
-        $binaryCode102bit = $first_byte . substr($binaryCode, 2);
-
+        $first_byte = sprintf('%2s', dechex(hexdec($binary_code_array[0]) << 2 >> 2));
+        $binary_code102bit = $first_byte . substr($binary_code, 2);
         // convert binary data to codewords
         $codewords = [];
-        $data = $this->hexToDec($binaryCode102bit);
+        $data = $this->hex_to_dec($binary_code102bit);
         $codewords[0] = bcmod($data, 636) * 2;
         $data = bcdiv($data, 636);
-
         for ($i = 1; $i < 9; ++$i) {
             $codewords[$i] = bcmod($data, 1365);
             $data = bcdiv($data, 1365);
         }
-
         $codewords[9] = $data;
-        if (($fcs >> 10) == 1) {
+        if ($fcs >> 10 == 1) {
             $codewords[9] += 659;
         }
-
         // generate lookup tables
-        $table2of13 = $this->imbTables(2, 78);
-        $table5of13 = $this->imbTables(5, 1287);
-
+        $table2of13 = $this->imb_tables(2, 78);
+        $table5of13 = $this->imb_tables(5, 1287);
         // convert codewords to characters
         $characters = [];
         $bitmask = 512;
-
         foreach ($codewords as $k => $val) {
             if ($val <= 1286) {
                 $chrcode = $table5of13[$val];
             } else {
-                $chrcode = $table2of13[($val - 1287)];
+                $chrcode = $table2of13[$val - 1287];
             }
             if (($fcs & $bitmask) > 0) {
                 // bitwise invert
-                $chrcode = ((~$chrcode) & 8191);
+                $chrcode = ~$chrcode & 8191;
             }
             $characters[] = $chrcode;
             $bitmask /= 2;
         }
-
         $characters = array_reverse($characters);
-
         // build bars
         $k = 0;
         $bararray = ['code' => $code, 'maxw' => 0, 'maxh' => $daft['F'], 'bcode' => []];
         for ($i = 0; $i < 65; ++$i) {
-            $asc = (($characters[$asc_chr[$i]] & 2 ** $asc_pos[$i]) > 0);
-            $dsc = (($characters[$dsc_chr[$i]] & 2 ** $dsc_pos[$i]) > 0);
+            $asc = ($characters[$asc_chr[$i]] & 2 ** $asc_pos[$i]) > 0;
+            $dsc = ($characters[$dsc_chr[$i]] & 2 ** $dsc_pos[$i]) > 0;
             if ($asc and $dsc) {
                 // full bar (F)
                 $p = 0;
@@ -202,71 +168,67 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
             }
             $bararray['bcode'][$k++] = ['t' => 1, 'w' => 1, 'h' => $h, 'p' => $p];
             // Gap
-            $bararray['bcode'][$k++] = ['t' => 0, 'w' => $gapWidth, 'h' => 1, 'p' => 0];
-            $bararray['maxw'] += (1 + $gapWidth);
+            $bararray['bcode'][$k++] = ['t' => 0, 'w' => $gap_width, 'h' => 1, 'p' => 0];
+            $bararray['maxw'] += 1 + $gap_width;
         }
-
-        unset($bararray['bcode'][($k - 1)]);
-        $bararray['maxw'] -= $gapWidth;
-
+        unset($bararray['bcode'][$k - 1]);
+        $bararray['maxw'] -= $gap_width;
         $this->data = $bararray;
     }
-
     /**
      * Intelligent Mail Barcode calculation of Frame Check Sequence
      *
      * @param string[] $codeArray
      * @return int
      */
-    private function imbCrc11Fcs(array $codeArray)
+    private function imb_crc11fcs(array $code_array)
     {
-        $genpoly = 0x0F35; // generator polynomial
-        $fcs = 0x07FF; // Frame Check Sequence
-
+        $genpoly = 0xf35;
+        // generator polynomial
+        $fcs = 0x7ff;
+        // Frame Check Sequence
         // do most significant byte skipping the 2 most significant bits
-        $data = hexdec($codeArray[0]) << 5;
+        $data = hexdec($code_array[0]) << 5;
         for ($bit = 2; $bit < 8; ++$bit) {
             if (($fcs ^ $data) & 0x400) {
-                $fcs = ($fcs << 1) ^ $genpoly;
+                $fcs = $fcs << 1 ^ $genpoly;
             } else {
-                $fcs = ($fcs << 1);
+                $fcs = $fcs << 1;
             }
-            $fcs &= 0x7FF;
+            $fcs &= 0x7ff;
             $data <<= 1;
         }
         // do rest of bytes
         for ($byte = 1; $byte < 13; ++$byte) {
-            $data = hexdec($codeArray[$byte]) << 3;
+            $data = hexdec($code_array[$byte]) << 3;
             for ($bit = 0; $bit < 8; ++$bit) {
                 if (($fcs ^ $data) & 0x400) {
-                    $fcs = ($fcs << 1) ^ $genpoly;
+                    $fcs = $fcs << 1 ^ $genpoly;
                 } else {
-                    $fcs = ($fcs << 1);
+                    $fcs = $fcs << 1;
                 }
-                $fcs &= 0x7FF;
+                $fcs &= 0x7ff;
                 $data <<= 1;
             }
         }
         return $fcs;
     }
-
     /**
      * Reverse unsigned short value
      *
      * @param int $num
      * @return int
      */
-    private function imbReverseUs($num)
+    private function imb_reverse_us($num)
     {
         $rev = 0;
         for ($i = 0; $i < 16; ++$i) {
             $rev <<= 1;
-            $rev |= ($num & 1);
+            $rev |= $num & 1;
             $num >>= 1;
         }
         return $rev;
     }
-
     /**
      * Generate Nof13 tables used for Intelligent Mail Barcode
      *
@@ -275,21 +237,21 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
      *
      * @return mixed[]
      */
-    private function imbTables($n, $size)
+    private function imb_tables($n, $size)
     {
         $table = [];
-        $lli = 0; // LUT lower index
-        $lui = $size - 1; // LUT upper index
+        $lli = 0;
+        // LUT lower index
+        $lui = $size - 1;
+        // LUT upper index
         for ($count = 0; $count < 8192; ++$count) {
-
-            $bitCount = 0;
+            $bit_count = 0;
             for ($bit_index = 0; $bit_index < 13; ++$bit_index) {
-                $bitCount += (int) (($count & (1 << $bit_index)) != 0);
+                $bit_count += (int) (($count & 1 << $bit_index) != 0);
             }
-
             // if we don't have the right number of bits on, go on to the next value
-            if ($bitCount == $n) {
-                $reverse = ($this->imbReverseUs($count) >> 3);
+            if ($bit_count == $n) {
+                $reverse = $this->imb_reverse_us($count) >> 3;
                 // if the reverse is less than count, we have already visited this pair before
                 if ($reverse >= $count) {
                     // If count is symmetric, place it at the first free slot from the end of the list.
@@ -306,24 +268,20 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
                 }
             }
         }
-
         return $table;
     }
-
     /**
      * Convert large integer number to hexadecimal representation.
      *
      * @param int $number
      * @return string
      */
-    private function decToHex($number)
+    private function dec_to_hex($number)
     {
         $hex = [];
-
         if ($number == 0) {
             return '00';
         }
-
         while ($number > 0) {
             if ($number == 0) {
                 array_push($hex, '0');
@@ -332,11 +290,9 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
                 $number = bcdiv($number, '16', 0);
             }
         }
-
         $hex = array_reverse($hex);
         return implode('', $hex);
     }
-
     /**
      * Convert large hexadecimal number to decimal representation (string).
      * (requires PHP bcmath extension)
@@ -344,24 +300,22 @@ class Imb extends \Mpdf\Barcode\AbstractBarcode implements \Mpdf\Barcode\Barcode
      * @param string $hex
      * @return int
      */
-    private function hexToDec($hex)
+    private function hex_to_dec($hex)
     {
         $dec = 0;
         $bitval = 1;
         $len = strlen($hex);
-        for ($pos = ($len - 1); $pos >= 0; --$pos) {
+        for ($pos = $len - 1; $pos >= 0; --$pos) {
             $dec = bcadd($dec, bcmul(hexdec($hex[$pos]), $bitval));
             $bitval = bcmul($bitval, 16);
         }
         return $dec;
     }
-
     /**
      * @inheritdoc
      */
-    public function getType()
+    public function get_type()
     {
         return 'IMB';
     }
-
 }

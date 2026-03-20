@@ -1,23 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Css;
 
 use Mpdf\Exception\InvalidArgumentException;
-
-class BorderMerger
+class Border_Merger
 {
     /**
      * @var array<int> Border dominance levels for cell borders (top/right/bottom/left)
      */
-    private $borderDominance = [
-        'T' => 0,
-        'R' => 0,
-        'B' => 0,
-        'L' => 0,
-    ];
-
+    private $border_dominance = ['T' => 0, 'R' => 0, 'B' => 0, 'L' => 0];
     /**
      * Merge borders into CSS properties.
      *
@@ -25,13 +17,12 @@ class BorderMerger
      * @param array $cssProperties current CSS properties (passed by reference)
      * @return void
      */
-    public function mergeBorderProperties($newProperties, &$cssProperties)
+    public function merge_border_properties($new_properties, &$css_properties)
     {
         foreach (['TOP', 'RIGHT', 'BOTTOM', 'LEFT'] as $side) {
-            $this->mergeSideBorder($side, $newProperties, $cssProperties);
+            $this->merge_side_border($side, $new_properties, $css_properties);
         }
     }
-
     /**
      * Merge border properties for a specific side.
      *
@@ -43,49 +34,41 @@ class BorderMerger
      * @param array $cssProperties Target CSS properties (passed by reference)
      * @return void
      */
-    protected function mergeSideBorder($side, array $properties, array &$cssProperties)
+    protected function merge_side_border($side, array $properties, array &$css_properties)
     {
         // Merges $a['BORDER-TOP-STYLE'] to $cssProperties['BORDER-TOP'] etc.
-        $defaults = [
-            'WIDTH' => '0px',
-            'STYLE' => 'none',
-            'COLOR' => '#000000',
-        ];
-
-        $borderKey = 'BORDER-' . $side;
-        $currentBorder = isset($cssProperties[$borderKey]) ? trim($cssProperties[$borderKey]) : '';
-
+        $defaults = ['WIDTH' => '0px', 'STYLE' => 'none', 'COLOR' => '#000000'];
+        $border_key = 'BORDER-' . $side;
+        $current_border = isset($css_properties[$border_key]) ? trim($css_properties[$border_key]) : '';
         foreach (['STYLE', 'WIDTH', 'COLOR'] as $el) {
-            $propertyKey = $borderKey . '-' . $el;
-            if (!isset($properties[$propertyKey])) {
+            $property_key = $border_key . '-' . $el;
+            if (!isset($properties[$property_key])) {
                 continue;
             }
-
-            $value = trim($properties[$propertyKey]);
-            if ($currentBorder) {
+            $value = trim($properties[$property_key]);
+            if ($current_border) {
                 // Update existing border value
                 if ($el === 'STYLE') {
-                    $cssProperties[$borderKey] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\\1 ' . $value . ' \\3', $currentBorder);
+                    $css_properties[$border_key] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\1 ' . $value . ' \3', $current_border);
                 } elseif ($el === 'WIDTH') {
-                    $cssProperties[$borderKey] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', $value . ' \\2 \\3', $currentBorder);
-                } else { // COLOR
-                    $cssProperties[$borderKey] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\\1 \\2 ' . $value, $currentBorder);
+                    $css_properties[$border_key] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', $value . ' \2 \3', $current_border);
+                } else {
+                    // COLOR
+                    $css_properties[$border_key] = preg_replace('/(\S+)\s+(\S+)\s+(\S+)/', '\1 \2 ' . $value, $current_border);
                 }
-
-                $currentBorder = $cssProperties[$borderKey]; // Update current border for next iteration
+                $current_border = $css_properties[$border_key];
+                // Update current border for next iteration
             } else {
                 // Build new border from scratch with defaults
-                if (!isset($borderParts)) {
-                    $borderParts = $defaults;
+                if (!isset($border_parts)) {
+                    $border_parts = $defaults;
                 }
-
-                $borderParts[$el] = $value;
-                $cssProperties[$borderKey] = $borderParts['WIDTH'] . ' ' . $borderParts['STYLE'] . ' ' . $borderParts['COLOR'];
-                $currentBorder = $cssProperties[$borderKey];
+                $border_parts[$el] = $value;
+                $css_properties[$border_key] = $border_parts['WIDTH'] . ' ' . $border_parts['STYLE'] . ' ' . $border_parts['COLOR'];
+                $current_border = $css_properties[$border_key];
             }
         }
     }
-
     /**
      * Set border dominance level for table cells.
      *
@@ -96,25 +79,21 @@ class BorderMerger
      * @param int $val Dominance level value
      * @return void
      */
-    public function setDominanceFromProperties(array $prop, $val)
+    public function set_dominance_from_properties(array $prop, $val)
     {
         if (!empty($prop['BORDER-TOP'])) {
-            $this->setBorderDominance('T', $val);
+            $this->set_border_dominance('T', $val);
         }
-
         if (!empty($prop['BORDER-RIGHT'])) {
-            $this->setBorderDominance('R', $val);
+            $this->set_border_dominance('R', $val);
         }
-
         if (!empty($prop['BORDER-BOTTOM'])) {
-            $this->setBorderDominance('B', $val);
+            $this->set_border_dominance('B', $val);
         }
-
         if (!empty($prop['BORDER-LEFT'])) {
-            $this->setBorderDominance('L', $val);
+            $this->set_border_dominance('L', $val);
         }
     }
-
     /**
      * Set border dominance level for a specific side.
      *
@@ -122,23 +101,21 @@ class BorderMerger
      * @param int $val Dominance value
      * @throws InvalidArgumentException
      */
-    public function setBorderDominance($side, $val)
+    public function set_border_dominance($side, $val)
     {
-        if (!isset($this->borderDominance[$side])) {
+        if (!isset($this->border_dominance[$side])) {
             throw new InvalidArgumentException('Invalid border dominance value:' . $side);
         }
-
-        $this->borderDominance[$side] = (int) $val;
+        $this->border_dominance[$side] = (int) $val;
     }
-
     /**
      * Get border dominance level for a specific side.
      *
      * @param string $side T|R|B|L
      * @return int Dominance value
      */
-    public function getBorderDominance($side)
+    public function get_border_dominance($side)
     {
-        return isset($this->borderDominance[$side]) ? $this->borderDominance[$side] : 0;
+        return isset($this->border_dominance[$side]) ? $this->border_dominance[$side] : 0;
     }
 }

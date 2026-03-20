@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Http;
 
-use Psr\Http\Message\RequestInterface;
-
-interface ClientInterface
+use Psr\Http\Message\Request_Interface;
+interface Client_Interface
 {
-    public function sendRequest(RequestInterface $request);
-
+    public function send_request(Request_Interface $request);
 }

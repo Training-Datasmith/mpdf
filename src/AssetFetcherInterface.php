@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf;
 
-interface AssetFetcherInterface
+interface Asset_Fetcher_Interface
 {
     /**
      * Fetch data from a given path, either local or remote.
@@ -14,5 +13,5 @@ interface AssetFetcherInterface
      * @return string The fetched data.
      * @throws \Mpdf\Exception\AssetFetchingException If fetching fails.
      */
-    public function fetchDataFromPath($path, $originalSrc = null);
+    public function fetch_data_from_path($path, $original_src = null);
 }

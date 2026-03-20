@@ -1,42 +1,35 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf;
 
-use Mpdf\Color\ColorConverter;
-use Mpdf\Css\TextVars;
-
-class DirectWrite
+use Mpdf\Color\Color_Converter;
+use Mpdf\Css\Text_Vars;
+class Direct_Write
 {
     /**
      * @var \Mpdf\Mpdf
      */
     private $mpdf;
-
     /**
      * @var \Mpdf\Otl
      */
     private $otl;
-
     /**
      * @var \Mpdf\SizeConverter
      */
-    private $sizeConverter;
-
+    private $size_converter;
     /**
      * @var \Mpdf\Color\ColorConverter
      */
-    private $colorConverter;
-
-    public function __construct(Mpdf $mpdf, Otl $otl, SizeConverter $sizeConverter, ColorConverter $colorConverter)
+    private $color_converter;
+    public function __construct(Mpdf $mpdf, Otl $otl, Size_Converter $size_converter, Color_Converter $color_converter)
     {
         $this->mpdf = $mpdf;
         $this->otl = $otl;
-        $this->sizeConverter = $sizeConverter;
-        $this->colorConverter = $colorConverter;
+        $this->size_converter = $size_converter;
+        $this->color_converter = $color_converter;
     }
-
     public function Write($h, $txt, $currentx = 0, $link = '', $directionality = 'ltr', $align = '', $fill = 0)
     {
         if (!$align) {
@@ -47,21 +40,20 @@ class DirectWrite
             }
         }
         if ($h == 0) {
-            $this->mpdf->SetLineHeight();
+            $this->mpdf->set_line_height();
             $h = $this->mpdf->lineheight;
         }
         //Output text in flowing mode
-        $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-
-        $wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
+        $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+        $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
         $s = str_replace("\r", '', $txt);
-        if ($this->mpdf->usingCoreFont) {
+        if ($this->mpdf->using_core_font) {
             $nb = strlen($s);
         } else {
             $nb = mb_strlen($s, $this->mpdf->mb_enc);
             // handle single space character
-            if (($nb === 1) && $s === ' ') {
-                $this->mpdf->x += $this->mpdf->GetStringWidth($s);
+            if ($nb === 1 && $s === ' ') {
+                $this->mpdf->x += $this->mpdf->get_string_width($s);
                 return;
             }
         }
@@ -70,16 +62,17 @@ class DirectWrite
         $j = 0;
         $l = 0;
         $nl = 1;
-        if (!$this->mpdf->usingCoreFont) {
-            if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $txt)) {
-                $this->mpdf->biDirectional = true;
-            } // *RTL*
+        if (!$this->mpdf->using_core_font) {
+            if (preg_match('/([' . $this->mpdf->preg_rt_lchars . '])/u', $txt)) {
+                $this->mpdf->bi_directional = true;
+            }
+            // *RTL*
             while ($i < $nb) {
                 //Get next character
                 $c = mb_substr($s, $i, 1, $this->mpdf->mb_enc);
                 if ($c === "\n") {
                     // WORD SPACING
-                    $this->mpdf->ResetSpacing();
+                    $this->mpdf->reset_spacing();
                     //Explicit line break
                     $tmp = rtrim(mb_substr($s, $j, $i - $j, $this->mpdf->mb_enc));
                     $this->mpdf->Cell($w, $h, $tmp, 0, 2, $align, $fill, $link);
@@ -91,10 +84,10 @@ class DirectWrite
                         if ($currentx != 0) {
                             $this->mpdf->x = $currentx;
                         } else {
-                            $this->mpdf->x = $this->mpdf->lMargin;
+                            $this->mpdf->x = $this->mpdf->l_margin;
                         }
-                        $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                        $wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
+                        $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                        $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                     }
                     $nl++;
                     continue;
@@ -102,22 +95,23 @@ class DirectWrite
                 if ($c === ' ') {
                     $sep = $i;
                 }
-                $l += $this->mpdf->GetCharWidthNonCore($c); // mPDF 5.3.04
+                $l += $this->mpdf->get_char_width_non_core($c);
+                // mPDF 5.3.04
                 if ($l > $wmax) {
                     //Automatic line break (word wrapping)
                     if ($sep == -1) {
                         // WORD SPACING
-                        $this->mpdf->ResetSpacing();
-                        if ($this->mpdf->x > $this->mpdf->lMargin) {
+                        $this->mpdf->reset_spacing();
+                        if ($this->mpdf->x > $this->mpdf->l_margin) {
                             //Move to next line
                             if ($currentx != 0) {
                                 $this->mpdf->x = $currentx;
                             } else {
-                                $this->mpdf->x = $this->mpdf->lMargin;
+                                $this->mpdf->x = $this->mpdf->l_margin;
                             }
                             $this->mpdf->y += $h;
-                            $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                            $wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
+                            $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                            $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                             $i++;
                             $nl++;
                             continue;
@@ -129,22 +123,21 @@ class DirectWrite
                         $this->mpdf->Cell($w, $h, $tmp, 0, 2, $align, $fill, $link);
                     } else {
                         $tmp = rtrim(mb_substr($s, $j, $sep - $j, $this->mpdf->mb_enc));
-
                         if ($align === 'J') {
                             //////////////////////////////////////////
                             // JUSTIFY J using Unicode fonts (Word spacing doesn't work)
                             // WORD SPACING
                             // Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
                             $tmp = str_replace(chr(194) . chr(160), chr(32), $tmp);
-                            $len_ligne = $this->mpdf->GetStringWidth($tmp);
+                            $len_ligne = $this->mpdf->get_string_width($tmp);
                             $nb_carac = mb_strlen($tmp, $this->mpdf->mb_enc);
                             $nb_spaces = mb_substr_count($tmp, ' ', $this->mpdf->mb_enc);
-                            $inclCursive = false;
-                            if (!empty($this->mpdf->CurrentFont['useOTL']) && preg_match('/([' . $this->mpdf->pregCURSchars . '])/u', $tmp)) {
-                                $inclCursive = true;
+                            $incl_cursive = false;
+                            if (!empty($this->mpdf->current_font['useOTL']) && preg_match('/([' . $this->mpdf->preg_cur_schars . '])/u', $tmp)) {
+                                $incl_cursive = true;
                             }
-                            list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, (($w - 2) - $len_ligne) * Mpdf::SCALE, $inclCursive);
-                            $this->mpdf->SetSpacing($charspacing, $ws);
+                            list($charspacing, $ws) = $this->mpdf->get_jspacing($nb_carac, $nb_spaces, ($w - 2 - $len_ligne) * Mpdf::SCALE, $incl_cursive);
+                            $this->mpdf->set_spacing($charspacing, $ws);
                             //////////////////////////////////////////
                         }
                         $this->mpdf->Cell($w, $h, $tmp, 0, 2, $align, $fill, $link);
@@ -157,10 +150,10 @@ class DirectWrite
                         if ($currentx != 0) {
                             $this->mpdf->x = $currentx;
                         } else {
-                            $this->mpdf->x = $this->mpdf->lMargin;
+                            $this->mpdf->x = $this->mpdf->l_margin;
                         }
-                        $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                        $wmax = ($w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR));
+                        $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                        $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                     }
                     $nl++;
                 } else {
@@ -169,7 +162,7 @@ class DirectWrite
             }
             //Last chunk
             // WORD SPACING
-            $this->mpdf->ResetSpacing();
+            $this->mpdf->reset_spacing();
         } else {
             while ($i < $nb) {
                 //Get next character
@@ -177,7 +170,7 @@ class DirectWrite
                 if ($c === "\n") {
                     //Explicit line break
                     // WORD SPACING
-                    $this->mpdf->ResetSpacing();
+                    $this->mpdf->reset_spacing();
                     $this->mpdf->Cell($w, $h, substr($s, $j, $i - $j), 0, 2, $align, $fill, $link);
                     $i++;
                     $sep = -1;
@@ -187,10 +180,10 @@ class DirectWrite
                         if ($currentx != 0) {
                             $this->mpdf->x = $currentx;
                         } else {
-                            $this->mpdf->x = $this->mpdf->lMargin;
+                            $this->mpdf->x = $this->mpdf->l_margin;
                         }
-                        $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                        $wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
+                        $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                        $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                     }
                     $nl++;
                     continue;
@@ -198,22 +191,23 @@ class DirectWrite
                 if ($c === ' ') {
                     $sep = $i;
                 }
-                $l += $this->mpdf->GetCharWidthCore($c); // mPDF 5.3.04
+                $l += $this->mpdf->get_char_width_core($c);
+                // mPDF 5.3.04
                 if ($l > $wmax) {
                     //Automatic line break (word wrapping)
                     if ($sep == -1) {
                         // WORD SPACING
-                        $this->mpdf->ResetSpacing();
-                        if ($this->mpdf->x > $this->mpdf->lMargin) {
+                        $this->mpdf->reset_spacing();
+                        if ($this->mpdf->x > $this->mpdf->l_margin) {
                             //Move to next line
                             if ($currentx != 0) {
                                 $this->mpdf->x = $currentx;
                             } else {
-                                $this->mpdf->x = $this->mpdf->lMargin;
+                                $this->mpdf->x = $this->mpdf->l_margin;
                             }
                             $this->mpdf->y += $h;
-                            $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                            $wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
+                            $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                            $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                             $i++;
                             $nl++;
                             continue;
@@ -230,11 +224,11 @@ class DirectWrite
                             // WORD SPACING is not fully supported for complex scripts
                             // Change NON_BREAKING SPACE to spaces so they are 'spaced' properly
                             $tmp = str_replace(chr(160), chr(32), $tmp);
-                            $len_ligne = $this->mpdf->GetStringWidth($tmp);
+                            $len_ligne = $this->mpdf->get_string_width($tmp);
                             $nb_carac = strlen($tmp);
                             $nb_spaces = substr_count($tmp, ' ');
-                            list($charspacing, $ws) = $this->mpdf->GetJspacing($nb_carac, $nb_spaces, (($w - 2) - $len_ligne) * Mpdf::SCALE, $false);
-                            $this->mpdf->SetSpacing($charspacing, $ws);
+                            list($charspacing, $ws) = $this->mpdf->get_jspacing($nb_carac, $nb_spaces, ($w - 2 - $len_ligne) * Mpdf::SCALE, $false);
+                            $this->mpdf->set_spacing($charspacing, $ws);
                             //////////////////////////////////////////
                         }
                         $this->mpdf->Cell($w, $h, $tmp, 0, 2, $align, $fill, $link);
@@ -247,10 +241,10 @@ class DirectWrite
                         if ($currentx != 0) {
                             $this->mpdf->x = $currentx;
                         } else {
-                            $this->mpdf->x = $this->mpdf->lMargin;
+                            $this->mpdf->x = $this->mpdf->l_margin;
                         }
-                        $w = $this->mpdf->w - $this->mpdf->rMargin - $this->mpdf->x;
-                        $wmax = $w - ($this->mpdf->cMarginL + $this->mpdf->cMarginR);
+                        $w = $this->mpdf->w - $this->mpdf->r_margin - $this->mpdf->x;
+                        $wmax = $w - ($this->mpdf->c_margin_l + $this->mpdf->c_margin_r);
                     }
                     $nl++;
                 } else {
@@ -258,16 +252,16 @@ class DirectWrite
                 }
             }
             // WORD SPACING
-            $this->mpdf->ResetSpacing();
+            $this->mpdf->reset_spacing();
         }
         //Last chunk
         if ($i != $j) {
             if ($currentx != 0) {
                 $this->mpdf->x = $currentx;
             } else {
-                $this->mpdf->x = $this->mpdf->lMargin;
+                $this->mpdf->x = $this->mpdf->l_margin;
             }
-            if ($this->mpdf->usingCoreFont) {
+            if ($this->mpdf->using_core_font) {
                 $tmp = substr($s, $j, $i - $j);
             } else {
                 $tmp = mb_substr($s, $j, $i - $j, $this->mpdf->mb_enc);
@@ -275,52 +269,45 @@ class DirectWrite
             $this->mpdf->Cell($w, $h, $tmp, 0, 0, $align, $fill, $link);
         }
     }
-
-    public function CircularText($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsizePt = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
+    public function circular_text($x, $y, $r, $text, $align = 'top', $fontfamily = '', $fontsize_pt = 0, $fontstyle = '', $kerning = 120, $fontwidth = 100, $divider = '')
     {
-        if ($fontfamily || $fontstyle || $fontsizePt) {
-            $this->mpdf->SetFont($fontfamily, $fontstyle, $fontsizePt);
+        if ($fontfamily || $fontstyle || $fontsize_pt) {
+            $this->mpdf->set_font($fontfamily, $fontstyle, $fontsize_pt);
         }
-
         $kerning /= 100;
         $fontwidth /= 100;
-
         if ($kerning == 0) {
-            throw new \Mpdf\MpdfException('Please use values unequal to zero for kerning (CircularText)');
+            throw new \Mpdf\Mpdf_Exception('Please use values unequal to zero for kerning (CircularText)');
         }
-
         if ($fontwidth == 0) {
-            throw new \Mpdf\MpdfException('Please use values unequal to zero for font width (CircularText)');
+            throw new \Mpdf\Mpdf_Exception('Please use values unequal to zero for font width (CircularText)');
         }
-
         $text = str_replace("\r", '', $text);
-
         // circumference
-        $u = ($r * 2) * M_PI;
+        $u = $r * 2 * M_PI;
         $checking = true;
         $autoset = false;
-
         while ($checking) {
             $t = 0;
             $w = [];
-            if ($this->mpdf->usingCoreFont) {
+            if ($this->mpdf->using_core_font) {
                 $nb = strlen($text);
                 for ($i = 0; $i < $nb; $i++) {
-                    $w[$i] = $this->mpdf->GetStringWidth($text[$i]);
+                    $w[$i] = $this->mpdf->get_string_width($text[$i]);
                     $w[$i] *= $kerning * $fontwidth;
                     $t += $w[$i];
                 }
             } else {
                 $nb = mb_strlen($text, $this->mpdf->mb_enc);
                 $lastchar = '';
-                $unicode = $this->mpdf->UTF8StringToArray($text);
+                $unicode = $this->mpdf->utf8string_to_array($text);
                 for ($i = 0; $i < $nb; $i++) {
                     $c = mb_substr($text, $i, 1, $this->mpdf->mb_enc);
-                    $w[$i] = $this->mpdf->GetStringWidth($c);
+                    $w[$i] = $this->mpdf->get_string_width($c);
                     $w[$i] *= $kerning * $fontwidth;
                     $char = $unicode[$i];
-                    if ($this->mpdf->useKerning && $lastchar && isset($this->mpdf->CurrentFont['kerninfo'][$lastchar][$char])) {
-                        $tk = $this->mpdf->CurrentFont['kerninfo'][$lastchar][$char] * ($this->mpdf->FontSize / 1000) * $kerning * $fontwidth;
+                    if ($this->mpdf->use_kerning && $lastchar && isset($this->mpdf->current_font['kerninfo'][$lastchar][$char])) {
+                        $tk = $this->mpdf->current_font['kerninfo'][$lastchar][$char] * ($this->mpdf->font_size / 1000) * $kerning * $fontwidth;
                         $w[$i] += $tk / 2;
                         $w[$i - 1] += $tk / 2;
                         $t += $tk;
@@ -329,105 +316,87 @@ class DirectWrite
                     $t += $w[$i];
                 }
             }
-            if ($fontsizePt >= 0 || $autoset) {
+            if ($fontsize_pt >= 0 || $autoset) {
                 $checking = false;
             } else {
-                $t += $this->mpdf->GetStringWidth('  ');
+                $t += $this->mpdf->get_string_width('  ');
                 if ($divider) {
-                    $t += $this->mpdf->GetStringWidth('  ');
+                    $t += $this->mpdf->get_string_width('  ');
                 }
-                if ($fontsizePt == -2) {
-                    $fontsizePt = $this->mpdf->FontSizePt * 0.5 * $u / $t;
+                if ($fontsize_pt == -2) {
+                    $fontsize_pt = $this->mpdf->font_size_pt * 0.5 * $u / $t;
                 } else {
-                    $fontsizePt = $this->mpdf->FontSizePt * $u / $t;
+                    $fontsize_pt = $this->mpdf->font_size_pt * $u / $t;
                 }
-                $this->mpdf->SetFontSize($fontsizePt);
+                $this->mpdf->set_font_size($fontsize_pt);
                 $autoset = true;
             }
         }
-
         // total width of string in degrees
-        $d = ($t / $u) * 360;
-
-        $this->mpdf->StartTransform();
-
+        $d = $t / $u * 360;
+        $this->mpdf->start_transform();
         // rotate matrix for the first letter to center the text
         // (half of total degrees)
         if ($align === 'top') {
-            $this->mpdf->transformRotate(-$d / 2, $x, $y);
+            $this->mpdf->transform_rotate(-$d / 2, $x, $y);
         } else {
-            $this->mpdf->transformRotate($d / 2, $x, $y);
+            $this->mpdf->transform_rotate($d / 2, $x, $y);
         }
-
         // run through the string
         for ($i = 0; $i < $nb; $i++) {
-
             if ($align === 'top') {
-
                 // rotate matrix half of the width of current letter + half of the width of preceding letter
                 if ($i === 0) {
-                    $this->mpdf->transformRotate((($w[$i] / 2) / $u) * 360, $x, $y);
+                    $this->mpdf->transform_rotate($w[$i] / 2 / $u * 360, $x, $y);
                 } else {
-                    $this->mpdf->transformRotate((($w[$i] / 2 + $w[$i - 1] / 2) / $u) * 360, $x, $y);
+                    $this->mpdf->transform_rotate(($w[$i] / 2 + $w[$i - 1] / 2) / $u * 360, $x, $y);
                 }
-
                 if ($fontwidth !== 1) {
-                    $this->mpdf->StartTransform();
-                    $this->mpdf->transformScale($fontwidth * 100, 100, $x, $y);
+                    $this->mpdf->start_transform();
+                    $this->mpdf->transform_scale($fontwidth * 100, 100, $x, $y);
                 }
-
-                $this->mpdf->SetXY($x - $w[$i] / 2, $y - $r);
-
+                $this->mpdf->set_xy($x - $w[$i] / 2, $y - $r);
             } else {
-
                 // rotate matrix half of the width of current letter + half of the width of preceding letter
                 if ($i === 0) {
-                    $this->mpdf->transformRotate(-(($w[$i] / 2) / $u) * 360, $x, $y);
+                    $this->mpdf->transform_rotate(-($w[$i] / 2 / $u) * 360, $x, $y);
                 } else {
-                    $this->mpdf->transformRotate(-(($w[$i] / 2 + $w[$i - 1] / 2) / $u) * 360, $x, $y);
+                    $this->mpdf->transform_rotate(-(($w[$i] / 2 + $w[$i - 1] / 2) / $u) * 360, $x, $y);
                 }
-
                 if ($fontwidth !== 1) {
-                    $this->mpdf->StartTransform();
-                    $this->mpdf->transformScale($fontwidth * 100, 100, $x, $y);
+                    $this->mpdf->start_transform();
+                    $this->mpdf->transform_scale($fontwidth * 100, 100, $x, $y);
                 }
-                $this->mpdf->SetXY($x - $w[$i] / 2, $y + $r - $this->mpdf->FontSize);
+                $this->mpdf->set_xy($x - $w[$i] / 2, $y + $r - $this->mpdf->font_size);
             }
-
-            if ($this->mpdf->usingCoreFont) {
+            if ($this->mpdf->using_core_font) {
                 $c = $text[$i];
             } else {
                 $c = mb_substr($text, $i, 1, $this->mpdf->mb_enc);
             }
-
-            $this->mpdf->Cell($w[$i], $this->mpdf->FontSize, $c, 0, 0, 'C'); // mPDF 5.3.53
-
+            $this->mpdf->Cell($w[$i], $this->mpdf->font_size, $c, 0, 0, 'C');
+            // mPDF 5.3.53
             if ($fontwidth !== 1) {
-                $this->mpdf->StopTransform();
+                $this->mpdf->stop_transform();
             }
         }
-
-        $this->mpdf->StopTransform();
-
+        $this->mpdf->stop_transform();
         // mPDF 5.5.23
         if ($align === 'top' && $divider != '') {
-            $wc = $this->mpdf->GetStringWidth($divider);
+            $wc = $this->mpdf->get_string_width($divider);
             $wc *= $kerning * $fontwidth;
-
-            $this->mpdf->StartTransform();
-            $this->mpdf->transformRotate(90, $x, $y);
-            $this->mpdf->SetXY($x - $wc / 2, $y - $r);
-            $this->mpdf->Cell($wc, $this->mpdf->FontSize, $divider, 0, 0, 'C');
-            $this->mpdf->StopTransform();
-
-            $this->mpdf->StartTransform();
-            $this->mpdf->transformRotate(-90, $x, $y);
-            $this->mpdf->SetXY($x - $wc / 2, $y - $r);
-            $this->mpdf->Cell($wc, $this->mpdf->FontSize, $divider, 0, 0, 'C');
-            $this->mpdf->StopTransform();
+            $this->mpdf->start_transform();
+            $this->mpdf->transform_rotate(90, $x, $y);
+            $this->mpdf->set_xy($x - $wc / 2, $y - $r);
+            $this->mpdf->Cell($wc, $this->mpdf->font_size, $divider, 0, 0, 'C');
+            $this->mpdf->stop_transform();
+            $this->mpdf->start_transform();
+            $this->mpdf->transform_rotate(-90, $x, $y);
+            $this->mpdf->set_xy($x - $wc / 2, $y - $r);
+            $this->mpdf->Cell($wc, $this->mpdf->font_size, $divider, 0, 0, 'C');
+            $this->mpdf->stop_transform();
         }
     }
-
     public function Shaded_box($text, $font = '', $fontstyle = 'B', $szfont = '', $width = '70%', $style = 'DF', $radius = 2.5, $fill = '#FFFFFF', $color = '#000000', $pad = 2)
     {
         // F (shading - no line),S (line, no shading),DF (both)
@@ -437,79 +406,70 @@ class DirectWrite
         if (!$szfont) {
             $szfont = $this->mpdf->default_font_size * 1.8;
         }
-
         $text = ' ' . $text . ' ';
-        $this->mpdf->SetFont($font, $fontstyle, $szfont, false);
-
+        $this->mpdf->set_font($font, $fontstyle, $szfont, false);
         $text = $this->mpdf->purify_utf8_text($text);
-
         if ($this->mpdf->text_input_as_HTML) {
             $text = $this->mpdf->all_entities_to_utf8($text);
         }
-
-        if ($this->mpdf->usingCoreFont) {
+        if ($this->mpdf->using_core_font) {
             $text = mb_convert_encoding($text, $this->mpdf->mb_enc, 'UTF-8');
         }
-
         // DIRECTIONALITY
-        if (preg_match('/([' . $this->mpdf->pregRTLchars . '])/u', $text)) {
-            $this->mpdf->biDirectional = true;
-        } // *RTL*
-
+        if (preg_match('/([' . $this->mpdf->preg_rt_lchars . '])/u', $text)) {
+            $this->mpdf->bi_directional = true;
+        }
+        // *RTL*
         $textvar = 0;
-        $save_OTLtags = $this->mpdf->OTLtags;
-        $this->mpdf->OTLtags = [];
-
-        if ($this->mpdf->useKerning) {
-            if ($this->mpdf->CurrentFont['haskernGPOS']) {
-                $this->mpdf->OTLtags['Plus'] .= ' kern';
+        $save_ot_ltags = $this->mpdf->ot_ltags;
+        $this->mpdf->ot_ltags = [];
+        if ($this->mpdf->use_kerning) {
+            if ($this->mpdf->current_font['haskernGPOS']) {
+                $this->mpdf->ot_ltags['Plus'] .= ' kern';
             } else {
-                $textvar |= TextVars::FC_KERNING;
+                $textvar |= Text_Vars::FC_KERNING;
             }
         }
         // Use OTL OpenType Table Layout - GSUB & GPOS
-        if (!empty($this->mpdf->CurrentFont['useOTL'])) {
-            $text = $this->otl->applyOTL($text, $this->mpdf->CurrentFont['useOTL']);
-            $OTLdata = $this->otl->OTLdata;
+        if (!empty($this->mpdf->current_font['useOTL'])) {
+            $text = $this->otl->apply_otl($text, $this->mpdf->current_font['useOTL']);
+            $ot_ldata = $this->otl->ot_ldata;
         }
-        $this->mpdf->OTLtags = $save_OTLtags;
-
-        $this->mpdf->magic_reverse_dir($text, $this->mpdf->directionality, $OTLdata);
-
+        $this->mpdf->ot_ltags = $save_ot_ltags;
+        $this->mpdf->magic_reverse_dir($text, $this->mpdf->directionality, $ot_ldata);
         if (!$width) {
             $width = $this->mpdf->pgwidth;
         } else {
-            $width = $this->sizeConverter->convert($width, $this->mpdf->pgwidth);
+            $width = $this->size_converter->convert($width, $this->mpdf->pgwidth);
         }
-        $midpt = $this->mpdf->lMargin + ($this->mpdf->pgwidth / 2);
-        $r1 = $midpt - ($width / 2); //($this->mpdf->w / 2) - 40;
-        $r2 = $r1 + $width;   //$r1 + 80;
+        $midpt = $this->mpdf->l_margin + $this->mpdf->pgwidth / 2;
+        $r1 = $midpt - $width / 2;
+        //($this->mpdf->w / 2) - 40;
+        $r2 = $r1 + $width;
+        //$r1 + 80;
         $y1 = $this->mpdf->y;
-
         $loop = 0;
-
         while ($loop === 0) {
-            $this->mpdf->SetFont($font, $fontstyle, $szfont, false);
-            $sz = $this->mpdf->GetStringWidth($text, true, $OTLdata, $textvar);
-            if (($r1 + $sz) > $r2) {
+            $this->mpdf->set_font($font, $fontstyle, $szfont, false);
+            $sz = $this->mpdf->get_string_width($text, true, $ot_ldata, $textvar);
+            if ($r1 + $sz > $r2) {
                 $szfont--;
             } else {
                 $loop++;
             }
         }
-        $this->mpdf->SetFont($font, $fontstyle, $szfont, true, true);
-
-        $y2 = $this->mpdf->FontSize + ($pad * 2);
-
-        $this->mpdf->SetLineWidth(0.1);
-        $fc = $this->colorConverter->convert($fill, $this->mpdf->PDFAXwarnings);
-        $tc = $this->colorConverter->convert($color, $this->mpdf->PDFAXwarnings);
-        $this->mpdf->SetFColor($fc);
-        $this->mpdf->SetTColor($tc);
-        $this->mpdf->RoundedRect($r1, $y1, $r2 - $r1, $y2, $radius, $style);
-        $this->mpdf->SetX($r1);
-        $this->mpdf->Cell($r2 - $r1, $y2, $text, 0, 1, 'C', 0, '', 0, 0, 0, 'M', 0, false, $OTLdata, $textvar);
-        $this->mpdf->SetY($y1 + $y2 + 2); // +2 = mm margin below shaded box
+        $this->mpdf->set_font($font, $fontstyle, $szfont, true, true);
+        $y2 = $this->mpdf->font_size + $pad * 2;
+        $this->mpdf->set_line_width(0.1);
+        $fc = $this->color_converter->convert($fill, $this->mpdf->pdfa_xwarnings);
+        $tc = $this->color_converter->convert($color, $this->mpdf->pdfa_xwarnings);
+        $this->mpdf->set_f_color($fc);
+        $this->mpdf->set_t_color($tc);
+        $this->mpdf->rounded_rect($r1, $y1, $r2 - $r1, $y2, $radius, $style);
+        $this->mpdf->set_x($r1);
+        $this->mpdf->Cell($r2 - $r1, $y2, $text, 0, 1, 'C', 0, '', 0, 0, 0, 'M', 0, false, $ot_ldata, $textvar);
+        $this->mpdf->set_y($y1 + $y2 + 2);
+        // +2 = mm margin below shaded box
         $this->mpdf->Reset();
     }
 }

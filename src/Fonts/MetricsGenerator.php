@@ -1,111 +1,98 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Fonts;
 
-use Mpdf\TTFontFile;
-
-class MetricsGenerator
+use Mpdf\Tt_Font_File;
+class Metrics_Generator
 {
-    private $fontCache;
-
-    private $fontDescriptor;
-
-    public function __construct(FontCache $fontCache, $fontDescriptor)
+    private $font_cache;
+    private $font_descriptor;
+    public function __construct(Font_Cache $font_cache, $font_descriptor)
     {
-        $this->fontCache = $fontCache;
-        $this->fontDescriptor = $fontDescriptor;
+        $this->font_cache = $font_cache;
+        $this->font_descriptor = $font_descriptor;
     }
-
-    public function generateMetrics($ttffile, array $ttfstat, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL, $fontUseOTL)
+    public function generate_metrics($ttffile, array $ttfstat, $fontkey, $tt_cfont_id, $debugfonts, $bm_ponly, $use_otl, $font_use_otl)
     {
-        $ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
-        $ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
-
+        $ttf = new Tt_Font_File($this->font_cache, $this->font_descriptor);
+        $ttf->get_metrics($ttffile, $fontkey, $tt_cfont_id, $debugfonts, $bm_ponly, $use_otl);
+        // mPDF 5.7.1
         $font = [
-            'name' => $this->getFontName($ttf->fullName),
+            'name' => $this->get_font_name($ttf->full_name),
             'type' => 'TTF',
             'desc' => [
-                'CapHeight' => round($ttf->capHeight),
-                'XHeight' => round($ttf->xHeight),
+                'CapHeight' => round($ttf->cap_height),
+                'XHeight' => round($ttf->x_height),
                 'FontBBox' => '[' . round($ttf->bbox[0]) . ' ' . round($ttf->bbox[1]) . ' ' . round($ttf->bbox[2]) . ' ' . round($ttf->bbox[3]) . ']',
                 /* FontBBox from head table */
                 /* 		'MaxWidth' => round($ttf->advanceWidthMax),	// AdvanceWidthMax from hhea table	NB ArialUnicode MS = 31990 ! */
                 'Flags' => $ttf->flags,
                 'Ascent' => round($ttf->ascent),
                 'Descent' => round($ttf->descent),
-                'Leading' => round($ttf->lineGap),
-                'ItalicAngle' => $ttf->italicAngle,
-                'StemV' => round($ttf->stemV),
-                'MissingWidth' => round($ttf->defaultWidth),
+                'Leading' => round($ttf->line_gap),
+                'ItalicAngle' => $ttf->italic_angle,
+                'StemV' => round($ttf->stem_v),
+                'MissingWidth' => round($ttf->default_width),
             ],
-            'unitsPerEm' => round($ttf->unitsPerEm),
-            'up' => round($ttf->underlinePosition),
-            'ut' => round($ttf->underlineThickness),
-            'strp' => round($ttf->strikeoutPosition),
-            'strs' => round($ttf->strikeoutSize),
+            'unitsPerEm' => round($ttf->units_per_em),
+            'up' => round($ttf->underline_position),
+            'ut' => round($ttf->underline_thickness),
+            'strp' => round($ttf->strikeout_position),
+            'strs' => round($ttf->strikeout_size),
             'ttffile' => $ttffile,
-            'TTCfontID' => $TTCfontID,
-            'originalsize' => $ttfstat['size'] + 0, /* cast ? */
-            'sip' => ($ttf->sipset) ? true : false,
-            'smp' => ($ttf->smpset) ? true : false,
-            'BMPselected' => ($BMPonly) ? true : false,
+            'TTCfontID' => $tt_cfont_id,
+            'originalsize' => $ttfstat['size'] + 0,
+            /* cast ? */
+            'sip' => $ttf->sipset ? true : false,
+            'smp' => $ttf->smpset ? true : false,
+            'BMPselected' => $bm_ponly ? true : false,
             'fontkey' => $fontkey,
-            'panose' => $this->getPanose($ttf),
-            'haskerninfo' => ($ttf->kerninfo) ? true : false,
-            'haskernGPOS' => ($ttf->haskernGPOS) ? true : false,
-            'hassmallcapsGSUB' => ($ttf->hassmallcapsGSUB) ? true : false,
-            'fontmetrics' => $this->fontDescriptor,
-            'useOTL' => $fontUseOTL ?: 0,
-            'rtlPUAstr' => $ttf->rtlPUAstr,
-            'GSUBScriptLang' => $ttf->GSUBScriptLang,
-            'GSUBFeatures' => $ttf->GSUBFeatures,
-            'GSUBLookups' => $ttf->GSUBLookups,
-            'GPOSScriptLang' => $ttf->GPOSScriptLang,
-            'GPOSFeatures' => $ttf->GPOSFeatures,
-            'GPOSLookups' => $ttf->GPOSLookups,
+            'panose' => $this->get_panose($ttf),
+            'haskerninfo' => $ttf->kerninfo ? true : false,
+            'haskernGPOS' => $ttf->haskern_gpos ? true : false,
+            'hassmallcapsGSUB' => $ttf->hassmallcaps_gsub ? true : false,
+            'fontmetrics' => $this->font_descriptor,
+            'useOTL' => $font_use_otl ?: 0,
+            'rtlPUAstr' => $ttf->rtl_pu_astr,
+            'GSUBScriptLang' => $ttf->gsub_script_lang,
+            'GSUBFeatures' => $ttf->gsub_features,
+            'GSUBLookups' => $ttf->gsub_lookups,
+            'GPOSScriptLang' => $ttf->gpos_script_lang,
+            'GPOSFeatures' => $ttf->gpos_features,
+            'GPOSLookups' => $ttf->gpos_lookups,
             'kerninfo' => $ttf->kerninfo,
         ];
-
-        $this->fontCache->jsonWrite($fontkey . '.mtx.json', $font);
-        $this->fontCache->binaryWrite($fontkey . '.cw.dat', $ttf->charWidths);
-        $this->fontCache->binaryWrite($fontkey . '.gid.dat', $ttf->glyphIDtoUni);
-
-        if ($this->fontCache->has($fontkey . '.cgm')) {
-            $this->fontCache->remove($fontkey . '.cgm');
+        $this->font_cache->json_write($fontkey . '.mtx.json', $font);
+        $this->font_cache->binary_write($fontkey . '.cw.dat', $ttf->char_widths);
+        $this->font_cache->binary_write($fontkey . '.gid.dat', $ttf->glyph_i_dto_uni);
+        if ($this->font_cache->has($fontkey . '.cgm')) {
+            $this->font_cache->remove($fontkey . '.cgm');
         }
-
-        if ($this->fontCache->has($fontkey . '.z')) {
-            $this->fontCache->remove($fontkey . '.z');
+        if ($this->font_cache->has($fontkey . '.z')) {
+            $this->font_cache->remove($fontkey . '.z');
         }
-
-        if ($this->fontCache->jsonHas($fontkey . '.cw127.json')) {
-            $this->fontCache->jsonRemove($fontkey . '.cw127.json');
+        if ($this->font_cache->json_has($fontkey . '.cw127.json')) {
+            $this->font_cache->json_remove($fontkey . '.cw127.json');
         }
-
-        if ($this->fontCache->has($fontkey . '.cw')) {
-            $this->fontCache->remove($fontkey . '.cw');
+        if ($this->font_cache->has($fontkey . '.cw')) {
+            $this->font_cache->remove($fontkey . '.cw');
         }
-
         unset($ttf);
     }
-
-    protected function getFontName($fullName)
+    protected function get_font_name($full_name)
     {
-        return preg_replace('/[ ()]/', '', $fullName);
+        return preg_replace('/[ ()]/', '', $full_name);
     }
-
-    protected function getPanose($ttf)
+    protected function get_panose($ttf)
     {
         $panose = '';
         if (count($ttf->panose)) {
-            $panoseArray = array_merge([$ttf->sFamilyClass, $ttf->sFamilySubClass], $ttf->panose);
-            foreach ($panoseArray as $value) {
+            $panose_array = array_merge([$ttf->s_family_class, $ttf->s_family_sub_class], $ttf->panose);
+            foreach ($panose_array as $value) {
                 $panose .= ' ' . dechex($value);
             }
         }
-
         return $panose;
     }
 }

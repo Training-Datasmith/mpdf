@@ -1,59 +1,49 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Css;
 
-use Mpdf\AssetFetcher;
+use Mpdf\Asset_Fetcher;
 use Mpdf\Cache;
-use Mpdf\Color\ColorConverter;
+use Mpdf\Color\Color_Converter;
 use Mpdf\Mpdf;
-use Mpdf\SizeConverter;
+use Mpdf\Size_Converter;
 use Mpdf\Utils\Arrays;
 use Mpdf\Utils\Path;
-
-class CssParser
+class Css_Parser
 {
     /**
      * @var Mpdf
      */
     private $mpdf;
-
     /**
      * @var CssLoader
      */
-    private $cssLoader;
-
+    private $css_loader;
     /**
      * @var MediaQueryProcessor
      */
-    private $mediaQueryProcessor;
-
+    private $media_query_processor;
     /**
      * @var CommentParser
      */
-    private $commentParser;
-
+    private $comment_parser;
     /**
      * @var InlineStyleParser
      */
-    private $inlineStyleParser;
-
+    private $inline_style_parser;
     /**
      * @var SelectorParser
      */
-    private $selectorParser;
-
+    private $selector_parser;
     /**
      * @var NormalizeProperties
      */
-    private $normalizeProperties;
-
+    private $normalize_properties;
     /**
      * @var ShadowParser
      */
-    private $shadowParser;
-
+    private $shadow_parser;
     /**
      * CSS for simple selectors.
      *
@@ -73,7 +63,6 @@ class CssParser
      * @var array
      */
     private $css = [];
-
     /**
      * CSS for cascaded selectors.
      *
@@ -93,35 +82,26 @@ class CssParser
      *
      * @var array
      */
-    private $cascadeCSS = [];
-
+    private $cascade_css = [];
     /**
      * @var array An index used to filter redundant class names before passing to Arrays::allUniqueSortedCombinations
      */
-    private $usedClassNames = [];
-
+    private $used_class_names = [];
     /**
      * @var int Maximum number of classes found in a single selector
      */
-    private $maxClassDepth = 1;
-
-    public function __construct(
-        Mpdf $mpdf,
-        Cache $cache,
-        SizeConverter $sizeConverter,
-        ColorConverter $colorConverter,
-        AssetFetcher $assetFetcher
-    ) {
+    private $max_class_depth = 1;
+    public function __construct(Mpdf $mpdf, Cache $cache, Size_Converter $size_converter, Color_Converter $color_converter, Asset_Fetcher $asset_fetcher)
+    {
         $this->mpdf = $mpdf;
-        $this->normalizeProperties = new NormalizeProperties($mpdf, $sizeConverter, $colorConverter);
-        $this->cssLoader = new CssLoader($mpdf, $assetFetcher, $cache);
-        $this->mediaQueryProcessor = new MediaQueryProcessor($mpdf);
-        $this->commentParser = new CommentParser();
-        $this->inlineStyleParser = new InlineStyleParser($this->normalizeProperties);
-        $this->selectorParser = new SelectorParser($mpdf);
-        $this->shadowParser = new ShadowParser($mpdf, $sizeConverter, $colorConverter);
+        $this->normalize_properties = new Normalize_Properties($mpdf, $size_converter, $color_converter);
+        $this->css_loader = new Css_Loader($mpdf, $asset_fetcher, $cache);
+        $this->media_query_processor = new Media_Query_Processor($mpdf);
+        $this->comment_parser = new Comment_Parser();
+        $this->inline_style_parser = new Inline_Style_Parser($this->normalize_properties);
+        $this->selector_parser = new Selector_Parser($mpdf);
+        $this->shadow_parser = new Shadow_Parser($mpdf, $size_converter, $color_converter);
     }
-
     /**
      * Read and parse CSS from HTML content.
      *
@@ -131,106 +111,90 @@ class CssParser
     public function parse($html)
     {
         $this->css = [];
-        $this->cascadeCSS = [];
-
+        $this->cascade_css = [];
         $ind = 0;
         $css = '';
-
-        $html = $this->mediaQueryProcessor->filterByMediaQuery($html, '/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is');
-        $html = $this->mediaQueryProcessor->filterByMediaQuery($html, '/<link[^>]*media=["\']([^"\'>]*)["\'].*?>/is');
-        $html = $this->commentParser->removeCommentsFromStyleBlocks($html);
-        $html = $this->commentParser->removeHtmlComments($html);
-
-        $externalCss = $this->cssLoader->extractExternalStylesheetUrls($html);
-        $externalCssCount = count($externalCss);
-        while ($externalCssCount) {
-            $path = htmlspecialchars_decode($externalCss[$ind]);
-            $path = Path::relativeToAbsolutePath($path, $this->mpdf->basepath);
-            if (strpos($path, '//') === false) { // mPDF 5.7.3
+        $html = $this->media_query_processor->filter_by_media_query($html, '/<style[^>]*media=["\']([^"\'>]*)["\'].*?<\/style>/is');
+        $html = $this->media_query_processor->filter_by_media_query($html, '/<link[^>]*media=["\']([^"\'>]*)["\'].*?>/is');
+        $html = $this->comment_parser->remove_comments_from_style_blocks($html);
+        $html = $this->comment_parser->remove_html_comments($html);
+        $external_css = $this->css_loader->extract_external_stylesheet_urls($html);
+        $external_css_count = count($external_css);
+        while ($external_css_count) {
+            $path = htmlspecialchars_decode($external_css[$ind]);
+            $path = Path::relative_to_absolute_path($path, $this->mpdf->basepath);
+            if (strpos($path, '//') === false) {
+                // mPDF 5.7.3
                 $path = preg_replace('/\.css\?.*$/', '.css', $path);
             }
-
-            $stylesheetCss = $this->cssLoader->loadStylesheet($path);
-            if ($stylesheetCss) {
-                $css .= $this->cssLoader->processExternalCssImports($stylesheetCss, $path, $externalCss, $externalCssCount);
+            $stylesheet_css = $this->css_loader->load_stylesheet($path);
+            if ($stylesheet_css) {
+                $css .= $this->css_loader->process_external_css_imports($stylesheet_css, $path, $external_css, $external_css_count);
             }
-
-            $externalCssCount--;
+            $external_css_count--;
             $ind++;
         }
-
         // CSS as <style> in HTML document
         $regexp = '/<style.*?>(.*?)<\/style>/si';
-        if (preg_match_all($regexp, $html, $cssBlock)) {
-            $css .= ' ' . $this->cssLoader->resolveBackgroundUrls(implode(' ', $cssBlock[1]));
+        if (preg_match_all($regexp, $html, $css_block)) {
+            $css .= ' ' . $this->css_loader->resolve_background_urls(implode(' ', $css_block[1]));
         }
-
         $css = preg_replace('|/\*.*?\*/|s', ' ', $css);
         $css = preg_replace('/[\s\n\r\t\f]/s', ' ', $css);
-        $css = $this->mediaQueryProcessor->processMediaQueries($css);
-        $css = $this->cssLoader->processDataUriImages($css);
+        $css = $this->media_query_processor->process_media_queries($css);
+        $css = $this->css_loader->process_data_uri_images($css);
         $css = preg_replace('/(<\!\-\-|\-\->)/s', ' ', $css);
-        $css = $this->inlineStyleParser->processUrlsInCss($css);
-
-        $this->processCssString($css);
-
+        $css = $this->inline_style_parser->process_urls_in_css($css);
+        $this->process_css_string($css);
         // Remove CSS (tags and content), if any (it can be <style> or <style type="txt/css">)
         $html = preg_replace('/<style.*?>(.*?)<\/style>/si', '', $html);
-
         return $html;
     }
-
     /**
      * @return array
      */
-    public function getCss()
+    public function get_css()
     {
         return $this->css;
     }
-
     /**
      * @return array
      */
-    public function getCascadeCss()
+    public function get_cascade_css()
     {
-        return $this->cascadeCSS;
+        return $this->cascade_css;
     }
-
     /**
      * @return array
      */
-    public function getUsedClassNames()
+    public function get_used_class_names()
     {
-        return array_keys($this->usedClassNames);
+        return array_keys($this->used_class_names);
     }
-
     /**
      * @return int
      */
-    public function getMaxClassDepth()
+    public function get_max_class_depth()
     {
-        return $this->maxClassDepth;
+        return $this->max_class_depth;
     }
-
     /**
      * @param string $css
      * @return void
      */
-    private function processCssString($css)
+    private function process_css_string($css)
     {
         preg_match_all('/(.*?)\{(.*?)\}/', $css, $styles);
         $count = count($styles[1]);
         for ($i = 0; $i < $count; $i++) {
-            $classProperties = $this->parseCssProperties($styles[2][$i]);
-            $tagName = strtoupper(trim($styles[1][$i]));
-
-            $tags = explode(',', $tagName);
+            $class_properties = $this->parse_css_properties($styles[2][$i]);
+            $tag_name = strtoupper(trim($styles[1][$i]));
+            $tags = explode(',', $tag_name);
             foreach ($tags as $tag) {
-                $this->processCssSelector($tag, $classProperties);
+                $this->process_css_selector($tag, $class_properties);
             }
         }
     }
-
     /**
      * Process a CSS selector.
      *
@@ -238,83 +202,72 @@ class CssParser
      * @param array $classProperties CSS properties
      * @return void
      */
-    private function processCssSelector($selector, $classProperties)
+    private function process_css_selector($selector, $class_properties)
     {
         // store classes in an index for faster lookups
         if (strpos($selector, '.') !== false && preg_match_all('/\.([a-zA-Z0-9_\-]+)/', $selector, $matches)) {
-            foreach ($matches[1] as $className) {
-                $this->usedClassNames[$className] = true;
+            foreach ($matches[1] as $class_name) {
+                $this->used_class_names[$class_name] = true;
             }
-
-            $classCount = count($matches[1]);
-            if ($classCount > $this->maxClassDepth) {
-                $this->maxClassDepth = $classCount;
+            $class_count = count($matches[1]);
+            if ($class_count > $this->max_class_depth) {
+                $this->max_class_depth = $class_count;
             }
         }
-
         if (preg_match('/NTH-CHILD\((\s*(([\-+]?\d*)N(\s*[\-+]\s*\d+)?|[\-+]?\d+|ODD|EVEN)\s*)\)/', $selector, $m)) {
             $selector = preg_replace('/NTH-CHILD\(.*\)/', 'NTH-CHILD(' . str_replace(' ', '', $m[1]) . ')', $selector);
         }
-
         $tags = preg_split('/\s+/', trim($selector));
         $level = count($tags);
         if (trim($tags[0]) === '@PAGE') {
-            $tag = $this->selectorParser->parsePageSelector($tags);
+            $tag = $this->selector_parser->parse_page_selector($tags);
             if ($tag && isset($this->css[$tag])) {
-                $this->css[$tag] = Arrays::uniqueRecursiveMerge($this->css[$tag], $classProperties);
+                $this->css[$tag] = Arrays::unique_recursive_merge($this->css[$tag], $class_properties);
             } elseif ($tag) {
-                $this->css[$tag] = $classProperties;
+                $this->css[$tag] = $class_properties;
             }
-
             return;
         }
-
         if ($level === 1) {
-            $tag = $this->selectorParser->parseSimpleSelector($tags);
+            $tag = $this->selector_parser->parse_simple_selector($tags);
             if ($tag && isset($this->css[$tag])) {
-                $this->css[$tag] = Arrays::uniqueRecursiveMerge($this->css[$tag], $classProperties);
+                $this->css[$tag] = Arrays::unique_recursive_merge($this->css[$tag], $class_properties);
             } elseif ($tag) {
-                $this->css[$tag] = $classProperties;
+                $this->css[$tag] = $class_properties;
             }
             return;
         }
-
-        $cascade = $this->selectorParser->parseCascadedSelector($tags);
+        $cascade = $this->selector_parser->parse_cascaded_selector($tags);
         if (empty($cascade)) {
             return;
         }
-
-        $cascadeCSS = &$this->cascadeCSS;
+        $cascade_css =& $this->cascade_css;
         foreach ($cascade as $tag) {
-            $cascadeCSS = &$cascadeCSS[$tag];
+            $cascade_css =& $cascade_css[$tag];
         }
-
-        $cascadeCSS = Arrays::uniqueRecursiveMerge($cascadeCSS, $classProperties);
-        $cascadeCSS['depth'] = $level;
+        $cascade_css = Arrays::unique_recursive_merge($cascade_css, $class_properties);
+        $cascade_css['depth'] = $level;
     }
-
     /**
      * Parse CSS property string into an array.
      *
      * @param string $rawStyles CSS style string (e.g. "color: red; font-size: 12px")
      * @return array Associative array of CSS properties
      */
-    public function parseCssProperties($rawStyles)
+    public function parse_css_properties($raw_styles)
     {
-        $classProperties = [];
-        $styles = explode(';', trim($rawStyles));
-
+        $class_properties = [];
+        $styles = explode(';', trim($raw_styles));
         foreach ($styles as $style) {
             if (empty(trim($style))) {
                 continue;
             }
-
             // Changed to allow style="background: url('http://www.bpm1.com/bg.jpg')"
             $tmp = explode(':', $style, 2);
             $property = strtoupper(trim($tmp[0]));
             $value = isset($tmp[1]) ? $tmp[1] : '';
-
-            $value = str_replace('%ZZ', ';', $value); // restore URL placeholder
+            $value = str_replace('%ZZ', ';', $value);
+            // restore URL placeholder
             $value = preg_replace('/\s*!important/i', '', $value);
             $value = trim($value);
             if (empty($property)) {
@@ -323,31 +276,24 @@ class CssParser
             if (strlen($value) === 0) {
                 continue;
             }
-
             // Ignores -webkit-gradient so doesn't override -moz-
-            if (($property === 'BACKGROUND-IMAGE' || $property === 'BACKGROUND') &&
-                stripos($value, '-webkit-gradient') !== false
-            ) {
+            if (($property === 'BACKGROUND-IMAGE' || $property === 'BACKGROUND') && stripos($value, '-webkit-gradient') !== false) {
                 continue;
             }
-
-            $classProperties[$property] = $value;
+            $class_properties[$property] = $value;
         }
-
-        return $this->normalizeProperties->normalize($classProperties);
+        return $this->normalize_properties->normalize($class_properties);
     }
-
     /**
      * Parse inline CSS style attribute.
      *
      * @param string $html CSS string from style attribute
      * @return array Parsed CSS properties
      */
-    public function parseInlineCss($html)
+    public function parse_inline_css($html)
     {
-        return $this->inlineStyleParser->parse($html);
+        return $this->inline_style_parser->parse($html);
     }
-
     /**
      * Parse box-shadow CSS property.
      *
@@ -357,11 +303,10 @@ class CssParser
      * @param string $value Box-shadow property value
      * @return array Array of shadow definitions
      */
-    public function parseBoxShadow($value)
+    public function parse_box_shadow($value)
     {
-        return $this->shadowParser->parseBoxShadow($value);
+        return $this->shadow_parser->parse_box_shadow($value);
     }
-
     /**
      * Parse text-shadow CSS property.
      *
@@ -371,8 +316,8 @@ class CssParser
      * @param string $value Text-shadow property value
      * @return array Array of text shadow definitions
      */
-    public function parseTextShadow($value)
+    public function parse_text_shadow($value)
     {
-        return $this->shadowParser->parseTextShadow($value);
+        return $this->shadow_parser->parse_text_shadow($value);
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Gif;
 
 /**
@@ -14,70 +13,55 @@ namespace Mpdf\Gif;
  *
  * @link http://www.yamasoft.com
  */
-class ColorTable
+class Color_Table
 {
-    public $m_nColors;
-
-    public $m_arColors;
-
+    public $m_n_colors;
+    public $m_ar_colors;
     public function __construct()
     {
-        unset($this->m_nColors);
-        unset($this->m_arColors);
+        unset($this->m_n_colors);
+        unset($this->m_ar_colors);
     }
-
-    public function load($lpData, $num)
+    public function load($lp_data, $num)
     {
-        $this->m_nColors = 0;
-        $this->m_arColors = [];
-
+        $this->m_n_colors = 0;
+        $this->m_ar_colors = [];
         for ($i = 0; $i < $num; $i++) {
-            $rgb = substr($lpData, $i * 3, 3);
+            $rgb = substr($lp_data, $i * 3, 3);
             if (strlen($rgb) < 3) {
                 return false;
             }
-
-            $this->m_arColors[] = (ord($rgb[2]) << 16) + (ord($rgb[1]) << 8) + ord($rgb[0]);
-            $this->m_nColors++;
+            $this->m_ar_colors[] = (ord($rgb[2]) << 16) + (ord($rgb[1]) << 8) + ord($rgb[0]);
+            $this->m_n_colors++;
         }
-
         return true;
     }
-
-    public function toString()
+    public function to_string()
     {
         $ret = '';
-
-        for ($i = 0; $i < $this->m_nColors; $i++) {
-            $ret .=
-                chr(($this->m_arColors[$i] & 0x000000FF)) . // R
-                chr(($this->m_arColors[$i] & 0x0000FF00) >> 8) . // G
-                chr(($this->m_arColors[$i] & 0x00FF0000) >> 16);  // B
+        for ($i = 0; $i < $this->m_n_colors; $i++) {
+            $ret .= chr($this->m_ar_colors[$i] & 0xff) . chr(($this->m_ar_colors[$i] & 0xff00) >> 8) . chr(($this->m_ar_colors[$i] & 0xff0000) >> 16);
+            // B
         }
-
         return $ret;
     }
-
-    public function colorIndex($rgb)
+    public function color_index($rgb)
     {
-        $rgb = intval($rgb) & 0xFFFFFF;
-        $r1 = ($rgb & 0x0000FF);
-        $g1 = ($rgb & 0x00FF00) >> 8;
-        $b1 = ($rgb & 0xFF0000) >> 16;
+        $rgb = intval($rgb) & 0xffffff;
+        $r1 = $rgb & 0xff;
+        $g1 = ($rgb & 0xff00) >> 8;
+        $b1 = ($rgb & 0xff0000) >> 16;
         $idx = -1;
-
-        for ($i = 0; $i < $this->m_nColors; $i++) {
-            $r2 = ($this->m_arColors[$i] & 0x000000FF);
-            $g2 = ($this->m_arColors[$i] & 0x0000FF00) >> 8;
-            $b2 = ($this->m_arColors[$i] & 0x00FF0000) >> 16;
+        for ($i = 0; $i < $this->m_n_colors; $i++) {
+            $r2 = $this->m_ar_colors[$i] & 0xff;
+            $g2 = ($this->m_ar_colors[$i] & 0xff00) >> 8;
+            $b2 = ($this->m_ar_colors[$i] & 0xff0000) >> 16;
             $d = abs($r2 - $r1) + abs($g2 - $g1) + abs($b2 - $b1);
-
-            if (($idx == -1) || ($d < $dif)) {
+            if ($idx == -1 || $d < $dif) {
                 $idx = $i;
                 $dif = $d;
             }
         }
-
         return $idx;
     }
 }

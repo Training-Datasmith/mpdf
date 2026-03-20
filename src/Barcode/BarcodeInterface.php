@@ -1,31 +1,26 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Barcode;
 
-interface BarcodeInterface
+interface Barcode_Interface
 {
     /**
      * @return string
      */
-    public function getType();
-
+    public function get_type();
     /**
      * @return mixed[]
      */
-    public function getData();
-
+    public function get_data();
     /**
      * @param string $key
      *
      * @return mixed
      */
-    public function getKey($key);
-
+    public function get_key($key);
     /**
      * @return string
      */
-    public function getChecksum();
-
+    public function get_checksum();
 }

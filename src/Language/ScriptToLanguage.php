@@ -1,22 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Mpdf\Language;
 
 use Mpdf\Ucdn;
-
-class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
+class Script_To_Language implements \Mpdf\Language\Script_To_Language_Interface
 {
-    private $scriptDelimiterMap = [
-        'viet' => "\x{01A0}\x{01A1}\x{01AF}\x{01B0}\x{1EA0}-\x{1EF1}",
-        'persian' => "\x{067E}\x{0686}\x{0698}\x{06AF}",
-        'urdu' => "\x{0679}\x{0688}\x{0691}\x{06BA}\x{06BE}\x{06C1}\x{06D2}",
-        'pashto' => "\x{067C}\x{0681}\x{0685}\x{0689}\x{0693}\x{0696}\x{069A}\x{06BC}\x{06D0}", // ? and U+06AB, U+06CD
-        'sindhi' => "\x{067A}\x{067B}\x{067D}\x{067F}\x{0680}\x{0684}\x{068D}\x{068A}\x{068F}\x{068C}\x{0687}\x{0683}\x{0699}\x{06AA}\x{06A6}\x{06BB}\x{06B1}\x{06B3}",
+    private $script_delimiter_map = [
+        'viet' => "\\x{01A0}\\x{01A1}\\x{01AF}\\x{01B0}\\x{1EA0}-\\x{1EF1}",
+        'persian' => "\\x{067E}\\x{0686}\\x{0698}\\x{06AF}",
+        'urdu' => "\\x{0679}\\x{0688}\\x{0691}\\x{06BA}\\x{06BE}\\x{06C1}\\x{06D2}",
+        'pashto' => "\\x{067C}\\x{0681}\\x{0685}\\x{0689}\\x{0693}\\x{0696}\\x{069A}\\x{06BC}\\x{06D0}",
+        // ? and U+06AB, U+06CD
+        'sindhi' => "\\x{067A}\\x{067B}\\x{067D}\\x{067F}\\x{0680}\\x{0684}\\x{068D}\\x{068A}\\x{068F}\\x{068C}\\x{0687}\\x{0683}\\x{0699}\\x{06AA}\\x{06A6}\\x{06BB}\\x{06B1}\\x{06B3}",
     ];
-
-    private $scriptToLanguageMap = [
+    private $script_to_language_map = [
         /* European */
         Ucdn::SCRIPT_LATIN => 'und-Latn',
         Ucdn::SCRIPT_ARMENIAN => 'hy',
@@ -87,7 +85,8 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
         Ucdn::SCRIPT_BRAHMI => 'und-Brah',
         Ucdn::SCRIPT_KAITHI => 'und-Kthi',
         Ucdn::SCRIPT_KHAROSHTHI => 'und-Khar',
-        Ucdn::SCRIPT_MEETEI_MAYEK => 'und-Mtei', /* or omp-Mtei */
+        Ucdn::SCRIPT_MEETEI_MAYEK => 'und-Mtei',
+        /* or omp-Mtei */
         Ucdn::SCRIPT_SHARADA => 'und-Shrd',
         Ucdn::SCRIPT_SORA_SOMPENG => 'und-Sora',
         /* South East Asian */
@@ -113,12 +112,14 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
         Ucdn::SCRIPT_TAGALOG => 'tl',
         Ucdn::SCRIPT_TAGBANWA => 'tbw',
         /* East Asian */
-        Ucdn::SCRIPT_HAN => 'und-Hans', // und-Hans (simplified) or und-Hant (Traditional)
+        Ucdn::SCRIPT_HAN => 'und-Hans',
+        // und-Hans (simplified) or und-Hant (Traditional)
         Ucdn::SCRIPT_HANGUL => 'ko',
         Ucdn::SCRIPT_HIRAGANA => 'ja',
         Ucdn::SCRIPT_KATAKANA => 'ja',
         Ucdn::SCRIPT_LISU => 'lis',
-        Ucdn::SCRIPT_BOPOMOFO => 'und-Bopo', // zh-CN, zh-TW, zh-HK
+        Ucdn::SCRIPT_BOPOMOFO => 'und-Bopo',
+        // zh-CN, zh-TW, zh-HK
         Ucdn::SCRIPT_MIAO => 'und-Plrd',
         Ucdn::SCRIPT_YI => 'und-Yiii',
         /* American */
@@ -128,15 +129,12 @@ class ScriptToLanguage implements \Mpdf\Language\ScriptToLanguageInterface
         /* Other */
         Ucdn::SCRIPT_BRAILLE => 'und-Brai',
     ];
-
-    public function getLanguageByScript($script)
+    public function get_language_by_script($script)
     {
-        return isset($this->scriptToLanguageMap[$script]) ? $this->scriptToLanguageMap[$script] : null;
+        return isset($this->script_to_language_map[$script]) ? $this->script_to_language_map[$script] : null;
     }
-
-    public function getLanguageDelimiters($language)
+    public function get_language_delimiters($language)
     {
-        return isset($this->scriptDelimiterMap[$language]) ? $this->scriptDelimiterMap[$language] : null;
+        return isset($this->script_delimiter_map[$language]) ? $this->script_delimiter_map[$language] : null;
     }
-
 }
